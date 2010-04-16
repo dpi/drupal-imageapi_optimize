@@ -1,0 +1,173 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Image optimize functions
+ */
+
+/**
+ * Implementation of hook_imageapi_toolkit().
+ *
+ * this hook only gets called to see is a module implements the imageapi hooks...
+ */
+function imageapi_optimize_imageapi_toolkit() {
+}
+
+/**
+ * Settings form for the toolkit.
+ */
+function imageapi_optimize_settings_form() {
+  $toolkits = array();
+  foreach (imageapi_get_available_toolkits() as $toolkit => $info) {
+    if ($toolkit != 'imageapi_optimize') {
+      $toolkits[$toolkit] = $info['name'];
+    }
+  }
+
+  $form['imageapi_optimize_toolkit'] = array(
+    '#type' => 'radios',
+    '#title' => t('Base toolkit'),
+    '#default_value' => variable_get('imageapi_optimize_toolkit', imageapi_default_toolkit()),
+    '#options' => $toolkits,
+    '#element_validate' => array('imageapi_optimize_toolkit_element_validate'),
+  );
+
+  $form['imageapi_optimize_optipng'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to optipng'),
+    '#default_value' => variable_get('imageapi_optimize_optipng', ''),
+    '#element_validate' => array('imageapi_optimize_validate_path'),
+    '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://optipng.sourceforge.net/')),
+  );
+
+  $form['imageapi_optimize_jpegtran'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to jpegtran'),
+    '#default_value' => variable_get('imageapi_optimize_jpegtran', '/usr/bin/jpegtran'),
+    '#element_validate' => array('imageapi_optimize_validate_path'),
+    '#description' => t('Leave empty to skip this command. This is a part of <a href="!link">libjpeg</a> and could probably on your system.', array('!link' => 'http://ijg.org/')),
+  );
+
+  $form['imageapi_optimize_jfifremove'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to jfifremove'),
+    '#default_value' => variable_get('imageapi_optimize_jfifremove', ''),
+    '#element_validate' => array('imageapi_optimize_validate_path'),
+    '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://lyncd.com/files/imgopt/jfifremove.c')),
+  );
+
+  return system_settings_form($form);
+}
+
+function imageapi_optimize_toolkit_element_validate($element) {
+  if ($element['#value'] == 'imageapi_optimize') {
+    form_set_error($element['#name'], t('You must select a different toolkit from ImageAPI Optimize itself.'));
+  }
+}
+
+function imageapi_optimize_validate_path($element) {
+ 	if ($errors = _imageapi_optimize_check_path($element['#value'])) {
+ 	  form_set_error($element['#parents'][0], implode('<br />', $errors));
+ 	  return FALSE;
+  }
+ 	return TRUE;	
+}
+
+/**
+ * All ImageAPI functions call their base functions
+ */
+function imageapi_optimize_image_open($image) {
+  return _imageapi_optimize_invoke('open', $image)? $image : FALSE;
+}
+
+function imageapi_optimize_image_close($image, $dst) {
+  if (_imageapi_optimize_invoke('close', $image, array($dst))) {
+    return _imageapi_optimize_optimize($image, $dst);
+  }
+
+  return FALSE;
+}
+
+function imageapi_optimize_image_crop(&$image, $x, $y, $width, $height) {
+  return _imageapi_optimize_invoke('crop', $image, array($x, $y, $width, $height));
+}
+
+function imageapi_optimize_image_resize(&$image, $width, $height) {
+  return _imageapi_optimize_invoke('resize', $image, array($width, $height));
+}
+
+function imageapi_optimize_image_rotate(&$image, $degrees, $background) {
+  return _imageapi_optimize_invoke('rotate', $image, array($degrees, $background));
+}
+
+function imageapi_optimize_image_sharpen(&$image, $radius, $sigma, $amount, $threshold) {
+  return _imageapi_optimize_invoke('sharpen', $image, array($radius, $sigma, $amount, $threshold));
+}
+
+function imageapi_optimize_image_desaturate(&$image) {
+  return imageapi_toolkit_invoke('desaturate', $image);
+}
+
+/**
+ * Helper. Based on imageapi_invoke()
+ */
+function _imageapi_optimize_invoke($method, &$image, array $params = array()) {
+  $function = variable_get('imageapi_optimize_toolkit', '') .'_image_'. $method;
+  if (function_exists($function)) {
+    array_unshift($params, $image);
+    return call_user_func_array($function, $params);
+  }
+
+  return FALSE;
+}
+
+/**
+ * Check if a path exists and is executable
+ *
+ * Warning: it does not check if the command is harmful.
+ * You should keep an eye on users with "administer imageapi" permission
+ */
+function _imageapi_optimize_check_path($path) {
+  $errors = array();
+
+  if (! empty($path)) {
+    if (!is_file($path)) {
+      $errors[] = t('The specified path %file does not exist.', array('%file' => $path));
+    }
+    if (!$errors && !is_executable($path)) {
+      $errors[] = t('The specified path %file is not executable.', array('%file' => $path));
+    }
+    if (!$errors && $open_basedir = ini_get('open_basedir')) {
+      $errors[] = t('PHP\'s <a href="!open-basedir">open_basedir</a> security restriction is set to %open-basedir, which may be interfering with attempts to locate ImageMagick.', array('%file' => $path, '%open-basedir' => $open_basedir, '!info-link' => url('http://php.net/features.safe-mode#ini.open-basedir')));
+    }
+  }
+
+  return $errors;
+}
+
+/**
+ * Optimize image with external commands
+ */
+function _imageapi_optimize_optimize($image, $dst) {
+  switch ($image->info['mime/type']) {
+    case 'image/png':
+      if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
+        exec("$cmd -o5 $dst");
+      }
+      // advpng -z -4 -q "$1"
+      // pngout "$1" $TMPF -q -y
+      break;
+
+    case 'image/jpeg':
+      if ($cmd = variable_get('imageapi_optimize_jpegtran', '')) {
+        file_save_data(exec("$cmd -copy none -optimize $dst"), $dst);
+      }
+      if ($cmd = variable_get('imageapi_optimize_jfifremove', '')) {
+        file_save_data(exec("$cmd < $dst"), $dst);
+      }
+      break;
+  }
+
+  return TRUE;
+}

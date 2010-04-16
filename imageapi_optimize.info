@@ -1,0 +1,6 @@
+; $Id$
+name = ImageAPI Optimize
+description = An optimized version Image Toolkits
+package = ImageCache
+dependencies[] = imageapi
+core = 6.x

@@ -106,7 +106,15 @@ function imageapi_optimize_image_sharpen(&$image, $radius, $sigma, $amount, $thr
 }
 
 function imageapi_optimize_image_desaturate(&$image) {
-  return imageapi_toolkit_invoke('desaturate', $image);
+  return _imageapi_optimize_invoke('desaturate', $image);
+}
+
+/**
+ * Overlay is defined and used by Imagecache Actions
+ * http://drupal.org/project/imagecache_actions
+ */
+function imageapi_optimize_image_overlay(&$image, &$layer, $x, $y, $alpha, $reverse) {
+  return _imageapi_optimize_invoke('overlay', $image, array($layer, $x, $y, $alpha, $reverse));
 }
 
 /**

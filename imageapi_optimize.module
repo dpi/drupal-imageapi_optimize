@@ -158,7 +158,7 @@ function _imageapi_optimize_check_path($path) {
  * Optimize image with external commands
  */
 function _imageapi_optimize_optimize($image, $dst) {
-  switch ($image->info['mime/type']) {
+  switch ($image->info['mime_type']) {
     case 'image/png':
       if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
         exec("$cmd -o5 $dst");
@@ -169,13 +169,26 @@ function _imageapi_optimize_optimize($image, $dst) {
 
     case 'image/jpeg':
       if ($cmd = variable_get('imageapi_optimize_jpegtran', '')) {
-        file_save_data(exec("$cmd -copy none -optimize $dst"), $dst);
+        _imageapi_optimize_exec("$cmd -copy none -optimize $dst", $dst);
       }
       if ($cmd = variable_get('imageapi_optimize_jfifremove', '')) {
-        file_save_data(exec("$cmd < $dst"), $dst);
+        _imageapi_optimize_exec("$cmd < $dst", $dst);
       }
       break;
   }
 
   return TRUE;
 }
+
+/**
+ * Save result of a command into file
+ */
+function _imageapi_optimize_exec($cmd, $dst) {
+  ob_start();
+  passthru($cmd);
+  $output = ob_get_contents();
+  ob_end_clean();
+
+  file_put_contents($dst, $output);
+}
+

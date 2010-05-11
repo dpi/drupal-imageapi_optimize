@@ -36,7 +36,7 @@ function imageapi_optimize_settings_form() {
   $form['imageapi_optimize_advpng'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to advpng'),
-    '#default_value' => variable_get('imageapi_optimize_avipng', ''),
+    '#default_value' => variable_get('imageapi_optimize_advpng', ''),
     '#element_validate' => array('imageapi_optimize_validate_path'),
     '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a> (part of AdvanceCOMP).', array('!link' => 'http://advancemame.sourceforge.net/comp-download.html')),
   );
@@ -174,7 +174,6 @@ function _imageapi_optimize_optimize($image, $dst) {
       if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
         exec("$cmd -o5 $dst");
       }
-      // advpng -z -4 -q "$1"
       // pngout "$1" $TMPF -q -y
       break;
 

@@ -75,11 +75,11 @@ function imageapi_optimize_toolkit_element_validate($element) {
 }
 
 function imageapi_optimize_validate_path($element) {
- 	if ($errors = _imageapi_optimize_check_path($element['#value'])) {
- 	  form_set_error($element['#parents'][0], implode('<br />', $errors));
- 	  return FALSE;
+  if ($errors = _imageapi_optimize_check_path($element['#value'])) {
+     form_set_error($element['#parents'][0], implode('<br />', $errors));
+     return FALSE;
   }
- 	return TRUE;	
+  return TRUE;  
 }
 
 /**
@@ -147,15 +147,15 @@ function _imageapi_optimize_invoke($method, &$image, array $params = array()) {
 function _imageapi_optimize_check_path($path) {
   $errors = array();
 
-  if (! empty($path)) {
+  if (!empty($path)) {
     if (!is_file($path)) {
       $errors[] = t('The specified path %file does not exist.', array('%file' => $path));
     }
     if (!$errors && !is_executable($path)) {
       $errors[] = t('The specified path %file is not executable.', array('%file' => $path));
     }
-    if (!$errors && $open_basedir = ini_get('open_basedir')) {
-      $errors[] = t('PHP\'s <a href="!open-basedir">open_basedir</a> security restriction is set to %open-basedir, which may be interfering with attempts to locate ImageMagick.', array('%file' => $path, '%open-basedir' => $open_basedir, '!info-link' => url('http://php.net/features.safe-mode#ini.open-basedir')));
+    if ($errors && $open_basedir = ini_get('open_basedir')) {
+      $errors[] = t('PHP\'s <a href="!open-basedir">open_basedir</a> security restriction is set to %open-basedir, which may be interfering with attempts to locate %file.', array('%file' => $path, '%open-basedir' => $open_basedir, '!info-link' => url('http://php.net/features.safe-mode#ini.open-basedir')));
     }
   }
 

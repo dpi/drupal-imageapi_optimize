@@ -169,20 +169,20 @@ function _imageapi_optimize_optimize($image, $dst) {
   switch ($image->info['mime_type']) {
     case 'image/png':
       if ($cmd = variable_get('imageapi_optimize_advpng', '')) {
-        exec("$cmd -z -4 -q $dst");
+        exec("$cmd -z4q ".escapeshellarg($dst));
       }
       if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
-        exec("$cmd -o5 $dst");
+        exec("$cmd -o5 -quiet ".escapeshellarg($dst));
       }
       // pngout "$1" $TMPF -q -y
       break;
 
     case 'image/jpeg':
       if ($cmd = variable_get('imageapi_optimize_jpegtran', '')) {
-        _imageapi_optimize_exec("$cmd -copy none -optimize $dst", $dst);
+        _imageapi_optimize_exec("$cmd -copy none -optimize ".escapeshellarg($dst), $dst);
       }
       if ($cmd = variable_get('imageapi_optimize_jfifremove', '')) {
-        _imageapi_optimize_exec("$cmd < $dst", $dst);
+        _imageapi_optimize_exec("$cmd < ".escapeshellarg($dst), $dst);
       }
       break;
   }

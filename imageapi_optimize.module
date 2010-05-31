@@ -168,11 +168,11 @@ function _imageapi_optimize_check_path($path) {
 function _imageapi_optimize_optimize($image, $dst) {
   switch ($image->info['mime_type']) {
     case 'image/png':
-      if ($cmd = variable_get('imageapi_optimize_advpng', '')) {
-        exec("$cmd -z4q ".escapeshellarg($dst));
-      }
       if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
         exec("$cmd -o5 -quiet ".escapeshellarg($dst));
+      }
+      if ($cmd = variable_get('imageapi_optimize_advpng', '')) {
+        exec("$cmd -z4q ".escapeshellarg($dst));
       }
       // pngout "$1" $TMPF -q -y
       break;

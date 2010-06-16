@@ -131,7 +131,7 @@ function imageapi_optimize_image_overlay(&$image, &$layer, $x, $y, $alpha, $reve
 function _imageapi_optimize_invoke($method, &$image, array $params = array()) {
   $function = variable_get('imageapi_optimize_toolkit', '') .'_image_'. $method;
   if (function_exists($function)) {
-    array_unshift($params, $image);
+    array_unshift($params, &$image);
     return call_user_func_array($function, $params);
   }
 

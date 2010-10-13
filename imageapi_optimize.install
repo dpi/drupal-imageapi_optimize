@@ -1,0 +1,14 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Install, update and uninstall functions
+ */
+
+function imageapi_optimize_uninstall() {
+  variable_del('imageapi_optimize_toolkit');
+  variable_del('imageapi_optimize_advpng');
+  variable_del('imageapi_optimize_optipng');
+  variable_del('imageapi_optimize_jpegtran');
+  variable_del('imageapi_optimize_jiffremove');
+}

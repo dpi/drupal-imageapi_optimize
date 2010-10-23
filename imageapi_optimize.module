@@ -7,6 +7,27 @@
  */
 
 /**
+ * Implements hook_init().
+ *
+ * Abstract layer to all implemented method.
+ */
+function imageapi_optimize_init() {
+  if (! $cache = cache_get('imageapi_optimize:methods')) {
+    $methods = _imageapi_optimize_get_methods();
+  }
+  else {
+    $methods = $cache->data;
+  }
+
+  foreach ($methods as $method) {
+    eval('function imageapi_optimize_image_'.$method.'(&$image) {
+      $params = array_slice(func_get_args(), 1);
+      return _imageapi_optimize_invoke("'. $method .'", $image, $params);
+    }');
+  }
+}
+
+/**
  * Implementation of hook_imageapi_toolkit().
  *
  * this hook only gets called to see is a module implements the imageapi hooks...
@@ -65,6 +86,9 @@ function imageapi_optimize_settings_form() {
     '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://lyncd.com/files/imgopt/jfifremove.c')),
   );
 
+  // Reloads methods because user may change toolkit
+  $form['#submit'][] = '_imageapi_optimize_get_methods';
+
   return system_settings_form($form);
 }
 
@@ -95,34 +119,6 @@ function imageapi_optimize_image_close($image, $dst) {
   }
 
   return FALSE;
-}
-
-function imageapi_optimize_image_crop(&$image, $x, $y, $width, $height) {
-  return _imageapi_optimize_invoke('crop', $image, array($x, $y, $width, $height));
-}
-
-function imageapi_optimize_image_resize(&$image, $width, $height) {
-  return _imageapi_optimize_invoke('resize', $image, array($width, $height));
-}
-
-function imageapi_optimize_image_rotate(&$image, $degrees, $background) {
-  return _imageapi_optimize_invoke('rotate', $image, array($degrees, $background));
-}
-
-function imageapi_optimize_image_sharpen(&$image, $radius, $sigma, $amount, $threshold) {
-  return _imageapi_optimize_invoke('sharpen', $image, array($radius, $sigma, $amount, $threshold));
-}
-
-function imageapi_optimize_image_desaturate(&$image) {
-  return _imageapi_optimize_invoke('desaturate', $image);
-}
-
-/**
- * Overlay is defined and used by Imagecache Actions
- * http://drupal.org/project/imagecache_actions
- */
-function imageapi_optimize_image_overlay(&$image, &$layer, $x, $y, $alpha, $reverse) {
-  return _imageapi_optimize_invoke('overlay', $image, array($layer, $x, $y, $alpha, $reverse));
 }
 
 /**
@@ -203,3 +199,24 @@ function _imageapi_optimize_exec($cmd, $dst) {
   file_put_contents($dst, $output);
 }
 
+/**
+ * Gets all implemented methods by ImageAPI and contrib modules.
+ * This function takes a dozens of miliseconds CPU times.
+ */
+function _imageapi_optimize_get_methods() {
+  $funcs = get_defined_functions();
+  $methods = array();
+  $prefix = variable_get('imageapi_optimize_toolkit', '') .'_image_';
+
+  foreach ($funcs['user'] as $func) {
+    if (strpos($func, $prefix) === 0) {
+      $method = substr($func, strlen($prefix));
+      if (!in_array($method, array('open', 'close'))) {
+        $methods[] = $method;
+      }
+    }
+  }
+  cache_set('imageapi_optimize:methods', $methods);
+  watchdog('imageapi', 'Refresh ImageAPI methods');
+  return $methods;
+}

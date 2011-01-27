@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Image optimize functions
+ * Image optimize functionalities
  */
 
 /**
@@ -28,9 +28,9 @@ function imageapi_optimize_init() {
 }
 
 /**
- * Implementation of hook_imageapi_toolkit().
+ * Implements hook_imageapi_toolkit().
  *
- * this hook only gets called to see is a module implements the imageapi hooks...
+ * This hook only gets called to see is a module implements the imageapi hooks...
  */
 function imageapi_optimize_imageapi_toolkit() {
 }
@@ -144,7 +144,7 @@ function _imageapi_optimize_invoke($method, &$image, array $params = array()) {
 }
 
 /**
- * Check if a path exists and is executable
+ * Checks if a path exists and is executable
  *
  * Warning: it does not check if the command is harmful.
  * You should keep an eye on users with "administer imageapi" permission
@@ -168,30 +168,29 @@ function _imageapi_optimize_check_path($path) {
 }
 
 /**
- * Optimize image with external commands
+ * Optimizes image with external commands
  */
 function _imageapi_optimize_optimize($image, $dst) {
   switch ($image->info['mime_type']) {
     case 'image/png':
       if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
-        exec("$cmd -o5 -quiet ".escapeshellarg($dst));
+        exec("$cmd -o5 -quiet ". escapeshellarg($dst));
       }
       if ($cmd = variable_get('imageapi_optimize_pngcrush', '')) {
         $temp = tempnam(realpath(file_directory_temp()), 'file');
-        exec("$cmd -rem alla -reduce -brute -q ".escapeshellarg($dst) ." ". escapeshellarg($temp) ." && mv ".escapeshellarg($temp)." ".escapeshellarg($dst));
+        exec("$cmd -rem alla -reduce -brute -q ". escapeshellarg($dst) ." ". escapeshellarg($temp) ." && mv ". escapeshellarg($temp) ." ". escapeshellarg($dst));
       }
       if ($cmd = variable_get('imageapi_optimize_advpng', '')) {
-        exec("$cmd -z4q ".escapeshellarg($dst));
+        exec("$cmd -z4q ". escapeshellarg($dst));
       }
-      // pngout "$1" $TMPF -q -y
       break;
 
     case 'image/jpeg':
       if ($cmd = variable_get('imageapi_optimize_jpegtran', '')) {
-        _imageapi_optimize_exec("$cmd -copy none -optimize ".escapeshellarg($dst), $dst);
+        _imageapi_optimize_exec("$cmd -copy none -optimize ". escapeshellarg($dst), $dst);
       }
       if ($cmd = variable_get('imageapi_optimize_jfifremove', '')) {
-        _imageapi_optimize_exec("$cmd < ".escapeshellarg($dst), $dst);
+        _imageapi_optimize_exec("$cmd < ". escapeshellarg($dst), $dst);
       }
       break;
   }
@@ -200,7 +199,7 @@ function _imageapi_optimize_optimize($image, $dst) {
 }
 
 /**
- * Save result of a command into file
+ * Saves result of a command into file
  */
 function _imageapi_optimize_exec($cmd, $dst) {
   ob_start();

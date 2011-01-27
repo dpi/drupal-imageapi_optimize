@@ -70,6 +70,14 @@ function imageapi_optimize_settings_form() {
     '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://optipng.sourceforge.net/')),
   );
 
+  $form['imageapi_optimize_pngcrush'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to pngcrush'),
+    '#default_value' => variable_get('imageapi_optimize_pngcrush', ''),
+    '#element_validate' => array('imageapi_optimize_validate_path'),
+    '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://pmt.sourceforge.net/pngcrush/')),
+  );
+
   $form['imageapi_optimize_jpegtran'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to jpegtran'),
@@ -167,6 +175,10 @@ function _imageapi_optimize_optimize($image, $dst) {
     case 'image/png':
       if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
         exec("$cmd -o5 -quiet ".escapeshellarg($dst));
+      }
+      if ($cmd = variable_get('imageapi_optimize_pngcrush', '')) {
+        $temp = tempnam(realpath(file_directory_temp()), 'file');
+        exec("$cmd -rem alla -reduce -brute -q ".escapeshellarg($dst) ." ". escapeshellarg($temp) ." && mv ".escapeshellarg($temp)." ".escapeshellarg($dst));
       }
       if ($cmd = variable_get('imageapi_optimize_advpng', '')) {
         exec("$cmd -z4q ".escapeshellarg($dst));

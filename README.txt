@@ -1,4 +1,3 @@
-; $Id$
 
 Project homepage http://drupal.org/project/imageapi_optimize
 

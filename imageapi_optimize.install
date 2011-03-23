@@ -5,5 +5,16 @@
  */
 
 function imageapi_optimize_uninstall() {
-  db_query("DELETE FROM {variable} WHERE name LIKE 'imageapi_optimize_%'");
+  $variable_names = array(
+    'imageapi_optimize_service',
+    'imageapi_optimize_toolkit',
+    'imageapi_optimize_advpng',
+    'imageapi_optimize_optipng',
+    'imageapi_optimize_jpegtran',
+    'imageapi_optimize_jfifremove',
+    'imageapi_optimize_pngcrush',
+  );
+  foreach ($variable_names as $variable_name) {
+    variable_del($variable_name);
+  }
 }

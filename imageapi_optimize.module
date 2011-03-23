@@ -8,7 +8,7 @@
 /**
  * Implements hook_init().
  *
- * Abstract layer to all implemented method.
+ * Abstract layer to all methods implemented by base toolkit. 
  */
 function imageapi_optimize_init() {
   if (! $cache = cache_get('imageapi_optimize:methods')) {
@@ -19,7 +19,7 @@ function imageapi_optimize_init() {
   }
 
   foreach ($methods as $method) {
-    eval('function imageapi_optimize_image_'.$method.'(&$image) {
+    eval('function image_imageapi_optimize_'.$method.'($image) {
       $params = array_slice(func_get_args(), 1);
       return _imageapi_optimize_invoke("'. $method .'", $image, $params);
     }');
@@ -27,56 +27,76 @@ function imageapi_optimize_init() {
 }
 
 /**
- * Implements hook_imageapi_toolkit().
- *
- * This hook only gets called to see is a module implements the imageapi hooks...
+ * Implements hook_image_toolkits().
  */
-function imageapi_optimize_imageapi_toolkit() {
+function imageapi_optimize_image_toolkits() {
+  return array(
+    'imageapi_optimize' => array(
+      'title' => 'ImageAPI Optimize',
+      'available' => TRUE,
+    ),
+  );
 }
 
 /**
  * Settings form for the toolkit.
  */
-function imageapi_optimize_settings_form() {
+function image_imageapi_optimize_settings() {
   $toolkits = array();
-  foreach (imageapi_get_available_toolkits() as $toolkit => $info) {
+  foreach (image_get_available_toolkits() as $toolkit => $info) {
     if ($toolkit != 'imageapi_optimize') {
-      $toolkits[$toolkit] = $info['name'];
+      $toolkits[$toolkit] = $info;
     }
   }
+  $base_toolkit = variable_get('imageapi_optimize_toolkit', 'gd');
 
-  $form['imageapi_optimize_basic'] = array(
+  $form['imageapi_optimize_base_toolkit'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Basic settings'),
+    '#title' => t('ImageAPI Optimize Base Toolkit'),
   );
-
-  $form['imageapi_optimize_basic']['imageapi_optimize_toolkit'] = array(
+  $form['imageapi_optimize_base_toolkit']['imageapi_optimize_toolkit'] = array(
     '#type' => 'radios',
     '#title' => t('Base toolkit'),
-    '#default_value' => variable_get('imageapi_optimize_toolkit', imageapi_default_toolkit()),
+    '#default_value' => $base_toolkit,
     '#options' => $toolkits,
     '#element_validate' => array('imageapi_optimize_toolkit_element_validate'),
   );
 
+  $base_toolkit_settings_function = 'image_' . $base_toolkit . '_settings';
+  if (function_exists($base_toolkit_settings_function)) {
+    $base_toolkit_settings_form = $base_toolkit_settings_function();
+  }
+  $base_toolkit_settings_fieldset = array(
+    '#type' => 'fieldset',
+    '#title' => t('@toolkit Settings', array('@toolkit' => $toolkits[$base_toolkit])),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['imageapi_optimize_base_toolkit']['imageapi_optimize_toolkit_settings'] = array_merge($base_toolkit_settings_fieldset, $base_toolkit_settings_form);
+
+  $form['imageapi_optimize_service'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('ImageAPI Optimize Service'),
+  );
   $services = array(
     'internal' => 'Internal tools (configurable below)',
     'smushit' => 'Yahoo! Smush.It',
   );
-  $form['imageapi_optimize_basic']['imageapi_optimize_service'] = array(
+  $form['imageapi_optimize_service']['imageapi_optimize_service'] = array(
     '#type' => 'radios',
     '#title' => t('Choose which optimization service to use'),
     '#default_value' => variable_get('imageapi_optimize_service', 'internal'),
     '#options' => $services,
   );
 
-  $form['imageapi_optimize_internal'] = array(
+  
+  $form['imageapi_optimize_service']['imageapi_optimize_internal'] = array(
     '#type' => 'fieldset',
     '#title' => t('Paths to internal tools'),
     '#collapsible' => TRUE,
-    '#collapsed' => variable_get('imageapi_optimize_service', 'internal') !== 'internal',
+    '#collapsed' => TRUE,
   );
-  
-  $form['imageapi_optimize_internal']['imageapi_optimize_advpng'] = array(
+  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_advpng'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to advpng'),
     '#default_value' => variable_get('imageapi_optimize_advpng', ''),
@@ -84,7 +104,7 @@ function imageapi_optimize_settings_form() {
     '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a> (part of AdvanceCOMP).', array('!link' => 'http://advancemame.sourceforge.net/comp-download.html')),
   );
 
-  $form['imageapi_optimize_internal']['imageapi_optimize_optipng'] = array(
+  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_optipng'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to optipng'),
     '#default_value' => variable_get('imageapi_optimize_optipng', ''),
@@ -92,7 +112,7 @@ function imageapi_optimize_settings_form() {
     '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://optipng.sourceforge.net/')),
   );
 
-  $form['imageapi_optimize_internal']['imageapi_optimize_pngcrush'] = array(
+  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_pngcrush'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to pngcrush'),
     '#default_value' => variable_get('imageapi_optimize_pngcrush', ''),
@@ -100,7 +120,7 @@ function imageapi_optimize_settings_form() {
     '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://pmt.sourceforge.net/pngcrush/')),
   );
 
-  $form['imageapi_optimize_internal']['imageapi_optimize_jpegtran'] = array(
+  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_jpegtran'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to jpegtran'),
     '#default_value' => variable_get('imageapi_optimize_jpegtran', '/usr/bin/jpegtran'),
@@ -108,7 +128,7 @@ function imageapi_optimize_settings_form() {
     '#description' => t('Leave empty to skip this command. This is a part of <a href="!link">libjpeg</a> and could probably on your system.', array('!link' => 'http://ijg.org/')),
   );
 
-  $form['imageapi_optimize_internal']['imageapi_optimize_jfifremove'] = array(
+  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_jfifremove'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to jfifremove'),
     '#default_value' => variable_get('imageapi_optimize_jfifremove', ''),
@@ -119,7 +139,7 @@ function imageapi_optimize_settings_form() {
   // Reloads methods because user may change toolkit
   $form['#submit'][] = '_imageapi_optimize_get_methods';
 
-  return system_settings_form($form);
+  return $form;
 }
 
 function imageapi_optimize_toolkit_element_validate($element) {
@@ -139,12 +159,12 @@ function imageapi_optimize_validate_path($element) {
 /**
  * All ImageAPI functions call their base functions
  */
-function imageapi_optimize_image_open($image) {
-  return _imageapi_optimize_invoke('open', $image)? $image : FALSE;
+function image_imageapi_optimize_load($image) {
+  return _imageapi_optimize_invoke('load', $image);
 }
 
-function imageapi_optimize_image_close($image, $dst) {
-  if (_imageapi_optimize_invoke('close', $image, array($dst))) {
+function image_imageapi_optimize_save($image, $dst) {
+  if (_imageapi_optimize_invoke('save', $image, array($dst))) {
     return _imageapi_optimize_optimize($image, $dst);
   }
 
@@ -154,14 +174,12 @@ function imageapi_optimize_image_close($image, $dst) {
 /**
  * Helper. Based on imageapi_invoke()
  */
-function _imageapi_optimize_invoke($method, &$image, array $params = array()) {
-  $function = variable_get('imageapi_optimize_toolkit', '') .'_image_'. $method;
+function _imageapi_optimize_invoke($method, $image, array $params = array()) {
+  $function = 'image_' . variable_get('imageapi_optimize_toolkit', '') . '_' . $method;
   if (function_exists($function)) {
     array_unshift($params, $image);
-    $params[0] = &$image;
     return call_user_func_array($function, $params);
   }
-
   return FALSE;
 }
 
@@ -204,17 +222,18 @@ function _imageapi_optimize_optimize($image, $dst) {
  * Uses internal tools to optimize
  */
 function _imageapi_optimize_service_internal($image, $dst) {
+  $dst = drupal_realpath($dst);
   switch ($image->info['mime_type']) {
     case 'image/png':
       if ($cmd = variable_get('imageapi_optimize_optipng', '')) {
         exec("$cmd -o5 -quiet ". escapeshellarg($dst));
       }
       if ($cmd = variable_get('imageapi_optimize_pngcrush', '')) {
-        $temp = tempnam(realpath(file_directory_temp()), 'file');
+        $temp = drupal_realpath(drupal_tempnam('temporary://', 'file'));
         exec("$cmd -rem alla -reduce -brute -q ". escapeshellarg($dst) ." ". escapeshellarg($temp) ." && mv ". escapeshellarg($temp) ." ". escapeshellarg($dst));
       }
       if ($cmd = variable_get('imageapi_optimize_advpng', '')) {
-        exec("$cmd -z4q ". escapeshellarg($dst));
+        exec("$cmd -z4q ". escapeshellarg($dst), $return, $output);
       }
       break;
 
@@ -239,6 +258,7 @@ function _imageapi_optimize_service_smushit($image, $dst) {
     drupal_set_message(t('Required function, json_decode(), is not available.'), 'error');
     return FALSE;
   }
+  $dst = drupal_realpath($dst);
   $url = 'http://www.smushit.com/ysmush.it/ws.php';
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
@@ -251,13 +271,13 @@ function _imageapi_optimize_service_smushit($image, $dst) {
 
   $json = json_decode($data);
 
-  // SmushIt return an error if it cannot optimize the image. Otherwise, it
+  // SmushIt returns an error if it cannot optimize the image. Otherwise, it
   // returns an object, with 'dest' (temporary file) and 'percent' (savings)
   // among other properties.
-  if (!$json->error) {
+  if (!isset($json->error)) {
     $result = drupal_http_request($json->dest);
     if (!isset($result->error)) {
-      file_save_data($result->data, $dst, FILE_EXISTS_REPLACE);
+      file_unmanaged_save_data($result->data, $dst, FILE_EXISTS_REPLACE);
       return TRUE;
     }
   }
@@ -272,7 +292,7 @@ function _imageapi_optimize_exec($cmd, $dst) {
   $output = ob_get_contents();
   ob_end_clean();
 
-  file_put_contents($dst, $output);
+  file_unmanaged_save_data($output, $dst, FILE_EXISTS_REPLACE);
 }
 
 /**
@@ -282,12 +302,12 @@ function _imageapi_optimize_exec($cmd, $dst) {
 function _imageapi_optimize_get_methods() {
   $funcs = get_defined_functions();
   $methods = array();
-  $prefix = variable_get('imageapi_optimize_toolkit', '') .'_image_';
+  $prefix = 'image_' . variable_get('imageapi_optimize_toolkit', '') .'_';
 
   foreach ($funcs['user'] as $func) {
     if (strpos($func, $prefix) === 0) {
       $method = substr($func, strlen($prefix));
-      if (!in_array($method, array('open', 'close'))) {
+      if (!in_array($method, array('load', 'save', 'settings'))) {
         $methods[] = $method;
       }
     }

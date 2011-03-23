@@ -1,5 +1,5 @@
 name = ImageAPI Optimize
 description = An optimized version Image Toolkits
-package = ImageCache
-dependencies[] = imageapi
-core = 6.x
+core = 7.x
+files[] = imageapi_optimize.install
+files[] = imageapi_optimize.module

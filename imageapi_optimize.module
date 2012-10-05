@@ -300,6 +300,10 @@ function _imageapi_optimize_exec($cmd, $dst) {
  * This function takes a dozens of miliseconds CPU times.
  */
 function _imageapi_optimize_get_methods() {
+  // The list of toolkits might not loaded yet. We call this function to get
+  // toolkits in separate .inc files eventually included.
+  image_get_available_toolkits();
+
   $funcs = get_defined_functions();
   $methods = array();
   $prefix = 'image_' . variable_get('imageapi_optimize_toolkit', '') .'_';
@@ -316,3 +320,4 @@ function _imageapi_optimize_get_methods() {
   watchdog('imageapi', 'Refresh ImageAPI methods');
   return $methods;
 }
+

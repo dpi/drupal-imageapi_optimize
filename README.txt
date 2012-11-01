@@ -3,9 +3,9 @@ Project homepage http://drupal.org/project/imageapi_optimize
 
 == INSTALL ==
 
-After having enabled this module, go to admin/settings/imageapi, select
-'ImageAPI Optimize' as the default toolkit, then admin/settings/imageapi/config,
-adjust your settings.
+After having enabled this module, go to admin/config/media/image-toolkit,
+select 'ImageAPI Optimize' as the default toolkit and Save, then adjust your
+settings on the same page.
 
 ImageAPI can use 3rd service like Yahoo! SmushIt, all that you needs is PHP 5.2+
 with JSON support.

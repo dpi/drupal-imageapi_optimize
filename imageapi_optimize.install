@@ -4,6 +4,9 @@
  * Install, update and uninstall functions
  */
 
+/**
+ * Implements hook_uninstall().
+ */
 function imageapi_optimize_uninstall() {
   $variable_names = array(
     'imageapi_optimize_service',

@@ -5,6 +5,18 @@
  */
 
 /**
+ * Include additional files.
+ */
+$dirname = dirname(__FILE__);
+$includes = file_scan_directory($dirname . '/includes', '/.inc$/');
+foreach (module_list() as $module) {
+  $file = $dirname . '/includes/' . $module . '.inc';
+  if (isset($includes[$file])) {
+    require_once $file;
+  }
+}
+
+/**
  * Implements hook_init().
  *
  * Abstract layer to all methods implemented by base toolkit.
@@ -32,28 +44,28 @@ function imageapi_optimize_init() {
 function imageapi_optimize_image_toolkits() {
   return array(
     'imageapi_optimize' => array(
-      'title' => 'ImageAPI Optimize',
+      'title' => t('ImageAPI Optimize'),
       'available' => TRUE,
     ),
   );
 }
 
 /**
- * Settings form for the toolkit.
+ * Settings form callback for the image toolkit.
  */
 function image_imageapi_optimize_settings() {
-  $toolkits = array();
-  foreach (image_get_available_toolkits() as $toolkit => $info) {
-    if ($toolkit != 'imageapi_optimize') {
-      $toolkits[$toolkit] = $info;
-    }
-  }
-  $base_toolkit = variable_get('imageapi_optimize_toolkit', 'gd');
+  // Get all defined services and binaries info definitions.
+  $info = imageapi_optimize_info(TRUE);
 
   $form['imageapi_optimize_base_toolkit'] = array(
     '#type' => 'fieldset',
     '#title' => t('ImageAPI Optimize Base Toolkit'),
   );
+
+  // Base toolkit settings.
+  $toolkits = image_get_available_toolkits();
+  unset($toolkits['imageapi_optimize']);
+  $base_toolkit = variable_get('imageapi_optimize_toolkit', 'gd');
 
   $form['imageapi_optimize_base_toolkit']['imageapi_optimize_toolkit'] = array(
     '#type' => 'radios',
@@ -63,81 +75,62 @@ function image_imageapi_optimize_settings() {
     '#element_validate' => array('imageapi_optimize_toolkit_element_validate'),
   );
 
-  $base_toolkit_settings_function = 'image_' . $base_toolkit . '_settings';
-  if (function_exists($base_toolkit_settings_function)) {
-    $base_toolkit_settings_form = $base_toolkit_settings_function();
+  $function = 'image_' . $base_toolkit . '_settings';
+  if (function_exists($function)) {
+    $return = $function();
+    if (is_array($return)) {
+      $form['imageapi_optimize_base_toolkit']['imageapi_optimize_toolkit_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('@toolkit Settings', array('@toolkit' => $toolkits[$base_toolkit])),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      ) + $return;
+    }
   }
-  $base_toolkit_settings_fieldset = array(
-    '#type' => 'fieldset',
-    '#title' => t('@toolkit Settings', array('@toolkit' => $toolkits[$base_toolkit])),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['imageapi_optimize_base_toolkit']['imageapi_optimize_toolkit_settings'] = array_merge($base_toolkit_settings_fieldset, $base_toolkit_settings_form);
 
+  // Services (3rd party and internal) settings.
   $form['imageapi_optimize_service'] = array(
     '#type' => 'fieldset',
     '#title' => t('ImageAPI Optimize Service'),
-  );
-
-  $services = array(
-    'internal' => 'Internal tools (configurable below)',
-    'smushit' => 'Yahoo! Smush.It',
   );
 
   $form['imageapi_optimize_service']['imageapi_optimize_service'] = array(
     '#type' => 'radios',
     '#title' => t('Choose which optimization service to use'),
     '#default_value' => variable_get('imageapi_optimize_service', 'internal'),
-    '#options' => $services,
+    '#options' => array(),
   );
 
-  $form['imageapi_optimize_service']['imageapi_optimize_internal'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Paths to internal tools'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
+  foreach ($info['services'] as $name => $service) {
+    // Append this service to the available services.
+    $form['imageapi_optimize_service']['imageapi_optimize_service']['#options'][$name] = $service['title'];
+    if (isset($service['url'])) {
+      $form['imageapi_optimize_service']['imageapi_optimize_service']['#options'][$name] = l($service['title'], $service['url']);
+    }
 
-  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_advpng'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to advpng'),
-    '#default_value' => variable_get('imageapi_optimize_advpng', ''),
-    '#element_validate' => array('imageapi_optimize_validate_path'),
-    '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a> (part of AdvanceCOMP).', array('!link' => 'http://advancemame.sourceforge.net/comp-download.html')),
-  );
+    // Build service form if required.
+    if (isset($service['callbacks']['form'])) {
+      // Include services file if defined and available.
+      if (isset($service['file'])) {
+        include_once $service['file'];
+      }
 
-  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_optipng'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to optipng'),
-    '#default_value' => variable_get('imageapi_optimize_optipng', ''),
-    '#element_validate' => array('imageapi_optimize_validate_path'),
-    '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://optipng.sourceforge.net/')),
-  );
-
-  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_pngcrush'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to pngcrush'),
-    '#default_value' => variable_get('imageapi_optimize_pngcrush', ''),
-    '#element_validate' => array('imageapi_optimize_validate_path'),
-    '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://pmt.sourceforge.net/pngcrush/')),
-  );
-
-  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_jpegtran'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to jpegtran'),
-    '#default_value' => variable_get('imageapi_optimize_jpegtran', '/usr/bin/jpegtran'),
-    '#element_validate' => array('imageapi_optimize_validate_path'),
-    '#description' => t('Leave empty to skip this command. This is a part of <a href="!link">libjpeg</a> and could probably on your system.', array('!link' => 'http://ijg.org/')),
-  );
-
-  $form['imageapi_optimize_service']['imageapi_optimize_internal']['imageapi_optimize_jfifremove'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to jfifremove'),
-    '#default_value' => variable_get('imageapi_optimize_jfifremove', ''),
-    '#element_validate' => array('imageapi_optimize_validate_path'),
-    '#description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array('!link' => 'http://lyncd.com/files/imgopt/jfifremove.c')),
-  );
+      $return = $service['callbacks']['form']($info);
+      if (is_array($return)) {
+        $form['imageapi_optimize_service']['imageapi_optimize_' . $name] = array(
+          '#type' => 'fieldset',
+          '#title' => t('@service Settings', array('@service' => $name)),
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+          '#states' => array(
+            'visible' => array(
+              ':input[name="imageapi_optimize_service"]' => array('value' => $name),
+            ),
+          ),
+        ) + $return;
+      }
+    }
+  }
 
   // Reloads methods because user may change toolkit
   $form['#submit'][] = '_imageapi_optimize_get_methods';
@@ -152,18 +145,6 @@ function imageapi_optimize_toolkit_element_validate($element) {
   if ($element['#value'] == 'imageapi_optimize') {
     form_set_error($element['#name'], t('You must select a different toolkit from ImageAPI Optimize itself.'));
   }
-}
-
-/**
- * Validation callback for binary fields.
- */
-function imageapi_optimize_validate_path($element) {
-  $errors = _imageapi_optimize_check_path($element['#value']);
-  if ($errors) {
-    form_set_error($element['#parents'][0], implode('<br />', $errors));
-    return FALSE;
-  }
-  return TRUE;
 }
 
 /**
@@ -182,7 +163,6 @@ function image_imageapi_optimize_save($image, $dst) {
   }
   return FALSE;
 }
-
 /**
  * Helper. Based on image_toolkit_invoke()
  */
@@ -190,6 +170,7 @@ function _imageapi_optimize_invoke($method, $image, array $params = array()) {
   $function = 'image_' . variable_get('imageapi_optimize_toolkit', '') . '_' . $method;
   if (function_exists($function)) {
     array_unshift($params, $image);
+
     return call_user_func_array($function, $params);
   }
   return FALSE;
@@ -224,96 +205,76 @@ function _imageapi_optimize_check_path($path) {
  * Optimizes image with external commands
  */
 function _imageapi_optimize_optimize($image, $dst) {
-  $optimize_service = '_imageapi_optimize_service_' . variable_get('imageapi_optimize_service', 'internal');
-  $optimize_service($image, $dst);
+  $info = imageapi_optimize_info();
+  $service = variable_get('imageapi_optimize_service', 'internal');
+
+  if (isset($info['services'][$service])) {
+    $service = $info['services'][$service];
+    if (isset($service['file'])) {
+      include_once $service['file'];
+    }
+
+    $service['callbacks']['process']($image, $dst);
+  }
 
   // If optimize service fails, there is no problem. Original image is saved.
   return TRUE;
 }
 
 /**
- * Uses internal tools to optimize
+ * Load all defined services and binaries info definitions.
  */
-function _imageapi_optimize_service_internal($image, $dst) {
-  $dst = drupal_realpath($dst);
-  switch ($image->info['mime_type']) {
-    case 'image/png':
-      $cmd = variable_get('imageapi_optimize_optipng', '');
-      if ($cmd) {
-        exec("$cmd -o5 -quiet " . escapeshellarg($dst));
+function imageapi_optimize_info($reset = FALSE) {
+  $cache = cache_get('imageapi_optimize:info');
+
+  if (!$cache || $reset) {
+    $info = module_invoke_all('imageapi_optimize_info');
+    drupal_alter('image_optimze_info', $info);
+
+    // Process and validate all defined info.
+    foreach ($info as $type => &$types) {
+      foreach ($types as $name => &$data) {
+        // Set defaults.
+        $data += array(
+          'callbacks' => array(),
+          'weight' => 0,
+        );
+        $data['callbacks'] += array(
+          'process' => 'imageapi_optimize_' . $type . '_' . $name,
+        );
+
+        // Validate info.
+        $error = '';
+        if (!isset($data['title'])) {
+          $error .= t('Title not set.') . '<br />';
+        }
+
+        foreach ($data['callbacks'] as $callback) {
+          if (!function_exists($callback)) {
+            $error .= t('Function !callback doesn\'t exist.', array('!callback' => $callback)) . '<br />';
+          }
+        }
+
+        if (isset($data['file']) && !file_exists($data['file'])) {
+          $error .= t('File !file doesn\'t exist.', array('!file' => $file)) . '<br />';
+        }
+
+        if (!empty($error)) {
+          unset($info[$type][$name]);
+          watchdog('imageapi_optimize', $errors);
+        }
       }
 
-      $cmd = variable_get('imageapi_optimize_pngcrush', '');
-      if ($cmd) {
-        $temp = drupal_realpath(drupal_tempnam('temporary://', 'file'));
-        exec("$cmd -rem alla -reduce -brute -q " . escapeshellarg($dst) . " " . escapeshellarg($temp) . " && mv " . escapeshellarg($temp) . " " . escapeshellarg($dst));
-      }
-
-      $cmd = variable_get('imageapi_optimize_advpng', '');
-      if ($cmd) {
-        exec("$cmd -z4q " . escapeshellarg($dst), $return, $output);
-      }
-      break;
-
-    case 'image/jpeg':
-      $cmd = variable_get('imageapi_optimize_jpegtran', '');
-      if ($cmd) {
-        _imageapi_optimize_exec("$cmd -copy none -optimize " . escapeshellarg($dst), $dst);
-      }
-
-      $cmd = variable_get('imageapi_optimize_jfifremove', '');
-      if ($cmd) {
-        _imageapi_optimize_exec("$cmd < " . escapeshellarg($dst), $dst);
-      }
-      break;
-  }
-
-  return TRUE;
-}
-
-/**
- * Use smushit.com to optimize
- */
-function _imageapi_optimize_service_smushit($image, $dst) {
-  if (! function_exists('json_decode')) {
-    drupal_set_message(t('Required function, json_decode(), is not available.'), 'error');
-    return FALSE;
-  }
-  $dst = drupal_realpath($dst);
-  $url = 'http://www.smushit.com/ysmush.it/ws.php';
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $url);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-  curl_setopt($ch, CURLOPT_POST, TRUE);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, array('files' => '@' . $dst));
-  $data = curl_exec($ch);
-  curl_close($ch);
-
-  $json = json_decode($data);
-
-  // SmushIt returns an error if it cannot optimize the image. Otherwise, it
-  // returns an object, with 'dest' (temporary file) and 'percent' (savings)
-  // among other properties.
-  if (!isset($json->error)) {
-    $result = drupal_http_request($json->dest);
-    if (!isset($result->error)) {
-      file_unmanaged_save_data($result->data, $dst, FILE_EXISTS_REPLACE);
-      return TRUE;
+      // Sort by weight.
+      uasort($info[$type], 'drupal_sort_weight');
     }
+
+    // Cache the info to reduce future load times.
+    cache_set('imageapi_optimize:info', $info);
+    return $info;
   }
-}
 
-/**
- * Saves result of a command into file
- */
-function _imageapi_optimize_exec($cmd, $dst) {
-  ob_start();
-  passthru($cmd);
-  $output = ob_get_contents();
-  ob_end_clean();
-
-  file_unmanaged_save_data($output, $dst, FILE_EXISTS_REPLACE);
+  return $cache->data;
 }
 
 /**

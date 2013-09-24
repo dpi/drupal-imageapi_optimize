@@ -1,29 +1,29 @@
 <?php
 /**
  * @file
- * AdvanceCOMP PNG Compression Utility integration.
+ * AdvanceCOMP Deflate Compression Utility integration.
  */
 
 /**
  * Implements imageapi_optimize_TYPE_NAME_info().
  */
-function imageapi_optimize_binaries_advpng_info() {
+function imageapi_optimize_binaries_advdef_info() {
   return array(
-    'title' => t('AdvanceCOMP PNG Compression Utility'),
+    'title' => t('AdvanceCOMP Deflate Compression Utility'),
     'url' => 'http://advancemame.sourceforge.net/comp-download.html',
     'type' => 'png',
     'settings' => array(
       'recompress' => TRUE,
       'mode' => 4,
     ),
-    'weight' => 2,
+    'weight' => 3,
   );
 }
 
 /**
- * AdvanceCOMP PNG Compression Utility ImageAPI Optimize form callback.
+ * AdvanceCOMP Deflate Compression Utility ImageAPI Optimize form callback.
  */
-function imageapi_optimize_binaries_advpng_form($settings) {
+function imageapi_optimize_binaries_advdef_form($settings) {
   $form = array();
 
   $form['recompress'] = array(
@@ -49,9 +49,9 @@ function imageapi_optimize_binaries_advpng_form($settings) {
 }
 
 /**
- * AdvanceCOMP PNG Compression Utility ImageAPI Optimize binary callback.
+ * AdvanceCOMP Deflate Compression Utility ImageAPI Optimize binary callback.
  */
-function imageapi_optimize_binaries_advpng($image, $dst, $cmd, $settings) {
+function imageapi_optimize_binaries_advdef($image, $dst, $cmd, $settings) {
   if ($image->info['mime_type'] == 'image/png') {
     $args = '';
 

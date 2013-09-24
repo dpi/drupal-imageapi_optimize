@@ -11,17 +11,15 @@ function imageapi_optimize_binaries_jfifremove_info() {
   return array(
     'title' => t('Jfifremove'),
     'url' => 'https://github.com/kormoc/imgopt/blob/master/jfifremove.c',
-    'description' => t('Leave empty to skip this command. You can download it <a href="!link">here</a>.', array(
-      '!link' => 'https://github.com/kormoc/imgopt/blob/master/jfifremove.c'
-    )),
-    'weight' => 4,
+    'type' => 'jpeg',
+    'weight' => 1,
   );
 }
 
 /**
  * Jfifremove ImageAPI Optimize binary callback.
  */
-function imageapi_optimize_binaries_jfifremove($image, $dst, $cmd) {
+function imageapi_optimize_binaries_jfifremove($image, $dst, $cmd, $settings) {
   if ($image->info['mime_type'] == 'image/jpeg') {
     _imageapi_optimize_exec("$cmd < " . escapeshellarg($dst), $dst);
   }

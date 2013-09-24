@@ -39,6 +39,36 @@ function imageapi_optimize_init() {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function imageapi_optimize_theme() {
+  $items = array();
+
+  $items['imageapi_optimize_services_internal_form'] = array(
+    'render element' => 'form',
+    'file' => 'services/internal.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function imageapi_optimize_menu() {
+  $items['admin/config/media/image-toolkit/imageapi_optimize/%'] = array(
+    'title callback' => 'imageapi_optimize_internal_binary_settings_title',
+    'title arguments' => array(5),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_internal_binary_settings', 5),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'services/internal.inc',
+  );
+
+  return $items;
+}
+
+/**
  * Implements hook_image_toolkits().
  */
 function imageapi_optimize_image_toolkits() {
@@ -177,31 +207,6 @@ function _imageapi_optimize_invoke($method, $image, array $params = array()) {
 }
 
 /**
- * Checks if a path exists and is executable
- *
- * Warning: it does not check if the command is harmful.
- * You should keep an eye on users with "administer imageapi" permission
- */
-function _imageapi_optimize_check_path($path) {
-  $errors = array();
-
-  if (!empty($path)) {
-    if (!is_file($path)) {
-      $errors[] = t('The specified path %file does not exist.', array('%file' => $path));
-    }
-    if (!$errors && !is_executable($path)) {
-      $errors[] = t('The specified path %file is not executable.', array('%file' => $path));
-    }
-    $open_basedir = ini_get('open_basedir');
-    if ($errors && $open_basedir) {
-      $errors[] = t('PHP\'s <a href="!open-basedir">open_basedir</a> security restriction is set to %open-basedir, which may be interfering with attempts to locate %file.', array('%file' => $path, '%open-basedir' => $open_basedir, '!info-link' => url('http://php.net/features.safe-mode#ini.open-basedir')));
-    }
-  }
-
-  return $errors;
-}
-
-/**
  * Optimizes image with external commands
  */
 function _imageapi_optimize_optimize($image, $dst) {
@@ -242,6 +247,24 @@ function imageapi_optimize_info($reset = FALSE) {
         $data['callbacks'] += array(
           'process' => 'imageapi_optimize_' . $type . '_' . $name,
         );
+
+        // Add form callback if undefined yet available.
+        if (!isset($data['callbacks']['form'])) {
+          $function = 'imageapi_optimize_' . $type . '_' . $name . '_form';
+          if (function_exists($function)) {
+            $data['callbacks']['form'] = $function;
+          }
+        }
+
+        // Set user defined binaries weight if available.
+        if ('binaries' == $type) {
+          $settings = variable_get('imageapi_optimize_' . $name, array());
+          $data['weight'] = isset($settings['weight']) ? $settings['weight'] : $data['weight'];
+
+          if (empty($data['settings'])) {
+            $data['settings'] = array();
+          }
+        }
 
         // Validate info.
         $error = '';

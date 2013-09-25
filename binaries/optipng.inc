@@ -34,8 +34,8 @@ function imageapi_optimize_binaries_optipng_form($settings) {
   );
 
   $form['interlace'] = array(
-    '#type' => 'select',
     '#title' => t('Interlace'),
+    '#type' => 'select',
     '#options' => array(
       '' => t('No change'),
       0 => t('Non-interlaced'),

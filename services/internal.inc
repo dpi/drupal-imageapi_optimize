@@ -127,6 +127,11 @@ function imageapi_optimize_internal_binary_settings($form, $form_state, $name) {
       $form['imageapi_optimize_' . $name]['path']['#description'] = $binary['description'];
     }
 
+    $form['imageapi_optimize_' . $name]['weight'] = array(
+      '#type' => 'value',
+      '#value' => $binary['weight'],
+    );
+
     // Binary specific settings form.
     $advanced_settings = isset($settings['settings']) ? $settings['settings'] : $binary['settings'];
     $form['imageapi_optimize_' . $name]['settings'] = array(
@@ -158,7 +163,7 @@ function imageapi_optimize_services_internal($image, $dst) {
   $info = imageapi_optimize_info();
   foreach ($info['binaries'] as $name => $binary) {
     $settings = variable_get('imageapi_optimize_' . $name, array());
-    if ($settings['status'] && $settings['path']) {
+    if (isset($settings['status']) && $settings['status'] && $settings['path']) {
       // Include binary file if defined and available.
       if (isset($binary['file'])) {
         include_once $binary['file'];

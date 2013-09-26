@@ -16,7 +16,7 @@ function imageapi_optimize_binaries_optipng_info() {
       'level' => 5,
       'interlace' => '',
     ),
-    'weight' => 0,
+    'weight' => 1,
   );
 }
 

@@ -12,7 +12,7 @@ function imageapi_optimize_binaries_pngcrush_info() {
     'title' => t('Pngcrush'),
     'url' => 'http://pmt.sourceforge.net/pngcrush/',
     'type' => 'png',
-    'weight' => 1,
+    'weight' => 2,
   );
 }
 

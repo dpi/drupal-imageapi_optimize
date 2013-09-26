@@ -16,7 +16,7 @@ function imageapi_optimize_binaries_advpng_info() {
       'recompress' => TRUE,
       'mode' => 4,
     ),
-    'weight' => 2,
+    'weight' => 3,
   );
 }
 

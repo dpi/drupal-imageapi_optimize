@@ -12,7 +12,7 @@ function imageapi_optimize_binaries_pngout_info() {
     'title' => t('PNGOUT'),
     'url' => 'http://advsys.net/ken/utils.htm',
     'type' => 'png',
-    'weight' => 4,
+    'weight' => 5,
   );
 }
 

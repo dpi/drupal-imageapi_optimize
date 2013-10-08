@@ -131,6 +131,7 @@ function image_imageapi_optimize_settings() {
     '#options' => array(),
   );
 
+  uasort($info['services'], 'drupal_sort_weight');
   foreach ($info['services'] as $name => $service) {
     // Append this service to the available services.
     $form['imageapi_optimize_service']['imageapi_optimize_service']['#options'][$name] = $service['title'];
@@ -149,7 +150,7 @@ function image_imageapi_optimize_settings() {
       if (is_array($return)) {
         $form['imageapi_optimize_service']['imageapi_optimize_' . $name] = array(
           '#type' => 'fieldset',
-          '#title' => t('@service Settings', array('@service' => $name)),
+          '#title' => t('@service Settings', array('@service' => $service['title'])),
           '#collapsible' => TRUE,
           '#collapsed' => TRUE,
           '#states' => array(

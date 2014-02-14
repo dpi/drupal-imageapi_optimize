@@ -235,7 +235,7 @@ function imageapi_optimize_info($reset = FALSE) {
 
   if (!$cache || $reset) {
     $info = module_invoke_all('imageapi_optimize_info');
-    drupal_alter('image_optimze_info', $info);
+    drupal_alter('imageapi_optimize_info', $info);
 
     // Process and validate all defined info.
     foreach ($info as $type => &$types) {

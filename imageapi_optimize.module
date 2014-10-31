@@ -23,7 +23,7 @@ foreach (module_list() as $module) {
  */
 function imageapi_optimize_init() {
   $cache = cache_get('imageapi_optimize:methods');
-  if (!$cache) {
+  if (!$cache || (empty($cache->data) && variable_get('imageapi_optimize_toolkit', '') != '')) {
     $methods = _imageapi_optimize_get_methods();
   }
   else {

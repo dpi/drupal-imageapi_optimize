@@ -5,18 +5,6 @@
  */
 
 /**
- * Include additional files.
- */
-$dirname = dirname(__FILE__);
-$includes = file_scan_directory($dirname . '/includes', '/.inc$/');
-foreach (module_list() as $module) {
-  $file = $dirname . '/includes/' . $module . '.inc';
-  if (isset($includes[$file])) {
-    require_once $file;
-  }
-}
-
-/**
  * Implements hook_init().
  *
  * Abstract layer to all methods implemented by base toolkit.
@@ -36,6 +24,19 @@ function imageapi_optimize_init() {
       return _imageapi_optimize_invoke("' . $method . '", $image, $params);
     }');
   }
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function imageapi_optimize_hook_info() {
+  $hooks = array();
+
+  $hooks['imageapi_optimize_info'] = array(
+    'group' => 'imageapi_optimize',
+  );
+
+  return $hooks;
 }
 
 /**

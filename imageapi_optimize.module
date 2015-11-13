@@ -5,28 +5,6 @@
  */
 
 /**
- * Implements hook_init().
- *
- * Abstract layer to all methods implemented by base toolkit.
- */
-function imageapi_optimize_init() {
-  $cache = cache_get('imageapi_optimize:methods');
-  if (!$cache || (empty($cache->data) && variable_get('imageapi_optimize_toolkit', '') != '')) {
-    $methods = _imageapi_optimize_get_methods();
-  }
-  else {
-    $methods = $cache->data;
-  }
-
-  foreach ($methods as $method) {
-    eval('function image_imageapi_optimize_' . $method . '($image) {
-      $params = array_slice(func_get_args(), 1);
-      return _imageapi_optimize_invoke("' . $method . '", $image, $params);
-    }');
-  }
-}
-
-/**
  * Implements hook_hook_info().
  */
 function imageapi_optimize_hook_info() {
@@ -180,13 +158,6 @@ function imageapi_optimize_toolkit_element_validate($element) {
 }
 
 /**
- * Implements image_HOOK_load().
- */
-function image_imageapi_optimize_load($image) {
-  return _imageapi_optimize_invoke('load', $image);
-}
-
-/**
  * Implements image_HOOK_save().
  */
 function image_imageapi_optimize_save($image, $dst) {
@@ -196,13 +167,15 @@ function image_imageapi_optimize_save($image, $dst) {
   return FALSE;
 }
 /**
- * Helper. Based on image_toolkit_invoke()
+ * Helper. Based on image_toolkit_invoke().
+ *
+ * @see imageapi_optimize_optimize_effect
  */
 function _imageapi_optimize_invoke($method, $image, array $params = array()) {
-  $function = 'image_' . variable_get('imageapi_optimize_toolkit', '') . '_' . $method;
+  $toolkit = isset($image->original_toolkit) ? $image->original_toolkit : variable_get('imageapi_optimize_toolkit', '');
+  $function = 'image_' . $toolkit . '_' . $method;
   if (function_exists($function)) {
     array_unshift($params, $image);
-
     return call_user_func_array($function, $params);
   }
   return FALSE;
@@ -303,28 +276,28 @@ function imageapi_optimize_info($reset = FALSE) {
 }
 
 /**
- * Gets all implemented methods by ImageAPI and contrib modules.
- * This function takes a dozens of miliseconds CPU times.
+ * Implements hook_image_effect_info().
  */
-function _imageapi_optimize_get_methods() {
-  // The list of toolkits might not loaded yet. We call this function to get
-  // toolkits in separate .inc files eventually included.
-  image_get_available_toolkits();
+function imageapi_optimize_image_effect_info() {
+  $effects = array();
 
-  $funcs = get_defined_functions();
-  $methods = array();
-  $prefix = 'image_' . variable_get('imageapi_optimize_toolkit', '') . '_';
+  $effects['imageapi_optimize'] = array(
+    'label' => t('ImageAPI Optimize'),
+    'help' => t('This will optmize the image using the selected options, this should be the last effect in the preset'),
+    'effect callback' => 'imageapi_optimize_optimize_effect',
+  );
 
-  foreach ($funcs['user'] as $func) {
-    if (strpos($func, $prefix) === 0) {
-      $method = substr($func, strlen($prefix));
-      if (!in_array($method, array('load', 'save', 'settings'))) {
-        $methods[] = $method;
-      }
-    }
-  }
+  return $effects;
+}
 
-  cache_set('imageapi_optimize:methods', $methods);
-  watchdog('imageapi', 'Refresh ImageAPI methods');
-  return $methods;
+/**
+ * Image effect callback for image optimize.
+ *
+ * We actually just change the image toolkit to 'imageapi_optimize' so that
+ * when image_toolkit_invoke() is called by image_style_create_derivative()
+ * our function image_imageapi_optimize_save() is called.
+ */
+function imageapi_optimize_optimize_effect($image, $options) {
+  $image->original_toolkit = $image->toolkit;
+  $image->toolkit = 'imageapi_optimize';
 }

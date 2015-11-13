@@ -160,12 +160,21 @@ function imageapi_optimize_toolkit_element_validate($element) {
 /**
  * Implements image_HOOK_save().
  */
-function image_imageapi_optimize_save($image, $dst) {
+function image_imageapi_optimize_save(stdClass $image, $dst) {
   if (_imageapi_optimize_invoke('save', $image, array($dst))) {
-    return _imageapi_optimize_optimize($image, $dst);
+    $return = _imageapi_optimize_optimize($image, $dst);
   }
-  return FALSE;
+  else {
+    $return = FALSE;
+  }
+
+  // Remove our magic.
+  $image->toolkit = $toolkit = isset($image->original_toolkit) ? $image->original_toolkit : variable_get('imageapi_optimize_toolkit', '');
+  unset($image->original_toolkit);
+
+  return $return;
 }
+
 /**
  * Helper. Based on image_toolkit_invoke().
  *
@@ -297,7 +306,7 @@ function imageapi_optimize_image_effect_info() {
  * when image_toolkit_invoke() is called by image_style_create_derivative()
  * our function image_imageapi_optimize_save() is called.
  */
-function imageapi_optimize_optimize_effect($image, $options) {
+function imageapi_optimize_optimize_effect(stdClass $image, $options) {
   $image->original_toolkit = $image->toolkit;
   $image->toolkit = 'imageapi_optimize';
 }

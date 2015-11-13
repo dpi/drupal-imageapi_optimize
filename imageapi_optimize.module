@@ -301,3 +301,56 @@ function imageapi_optimize_optimize_effect($image, $options) {
   $image->original_toolkit = $image->toolkit;
   $image->toolkit = 'imageapi_optimize';
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function imageapi_optimize_form_image_style_form_alter(&$form, &$form_state, $form_id) {
+  $form['#validate'][] = 'imageapi_optimize_form_image_style_validate';
+  $form['effects']['new']['add']['#validate'][] = 'imageapi_optimize_form_image_style_validate';
+
+  // We only allow our effect to be added to a style once.
+  $style = $form_state['image_style'];
+  foreach ($style['effects'] as $effect) {
+    if ($effect['name'] == 'imageapi_optimize') {
+      unset($form['effects']['new']['new']['#options']['imageapi_optimize']);
+    }
+  }
+}
+
+/**
+ * Form validation function for image_style_form().
+ *
+ * We ensure that if our effect is present in the form it has the highest
+ * weight.
+ */
+function imageapi_optimize_form_image_style_validate($form, &$form_state) {
+  // Update the image style.
+  $style = $form_state['image_style'];
+
+  // Find the max of all the 'other' weights.
+  $weights = array();
+  $imageapi_optimize_effects_id = NULL;
+  if (!empty($form_state['values']['effects'])) {
+    foreach ($form_state['values']['effects'] as $ieid => $effect_data) {
+      if (isset($style['effects'][$ieid])) {
+        $effect = $style['effects'][$ieid];
+        if ($effect['name'] == 'imageapi_optimize') {
+          $imageapi_optimize_effects_id = $ieid;
+        }
+        else {
+          $weights[] = $effect_data['weight'];
+        }
+      }
+    }
+  }
+
+  // If the user is adding an effect, consider that too.
+  if ($form_state['triggering_element']['#value'] == $form['effects']['new']['add']['#value']) {
+    $weights[] = $form_state['values']['weight'];
+  }
+
+  if (isset($imageapi_optimize_effects_id) && !empty($weights)) {
+    form_set_value($form['effects'][$imageapi_optimize_effects_id]['weight'], max($weights) + 1, $form_state);
+  }
+}

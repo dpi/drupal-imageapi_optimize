@@ -254,12 +254,12 @@ function imageapi_optimize_info($reset = FALSE) {
         }
 
         if (isset($data['file']) && !file_exists($data['file'])) {
-          $error .= t('File !file doesn\'t exist.', array('!file' => $file)) . '<br />';
+          $error .= t('File !file doesn\'t exist.', array('!file' => $data['file'])) . '<br />';
         }
 
         if (!empty($error)) {
           unset($info[$type][$name]);
-          watchdog('imageapi_optimize', $errors);
+          watchdog('imageapi_optimize', $error);
         }
       }
 

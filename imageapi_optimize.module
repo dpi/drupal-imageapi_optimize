@@ -35,11 +35,20 @@ function imageapi_optimize_theme() {
  * Implements hook_menu().
  */
 function imageapi_optimize_menu() {
-  $items['admin/config/media/image-toolkit/imageapi_optimize/%'] = array(
-    'title callback' => 'imageapi_optimize_internal_binary_settings_title',
-    'title arguments' => array(5),
+
+  $items['admin/config/media/imageapi-optimize'] = array(
+    'title' => 'ImageAPI Optimize',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('imageapi_optimize_internal_binary_settings', 5),
+    'page arguments' => array('imageapi_optimize_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+
+  $items['admin/config/media/imageapi-optimize/%'] = array(
+    'title callback' => 'imageapi_optimize_internal_binary_settings_title',
+    'title arguments' => array(4),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_internal_binary_settings', 4),
     'access arguments' => array('administer site configuration'),
     'file' => 'services/internal.inc',
   );
@@ -54,107 +63,9 @@ function imageapi_optimize_image_toolkits() {
   return array(
     'imageapi_optimize' => array(
       'title' => t('ImageAPI Optimize'),
-      'available' => TRUE,
+      'available' => FALSE,
     ),
   );
-}
-
-/**
- * Settings form callback for the image toolkit.
- */
-function image_imageapi_optimize_settings() {
-  // Get all defined services and binaries info definitions.
-  $info = imageapi_optimize_info(TRUE);
-
-  $form['imageapi_optimize_base_toolkit'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('ImageAPI Optimize Base Toolkit'),
-  );
-
-  // Base toolkit settings.
-  $toolkits = image_get_available_toolkits();
-  unset($toolkits['imageapi_optimize']);
-  $base_toolkit = variable_get('imageapi_optimize_toolkit', 'gd');
-
-  $form['imageapi_optimize_base_toolkit']['imageapi_optimize_toolkit'] = array(
-    '#type' => 'radios',
-    '#title' => t('Base toolkit'),
-    '#default_value' => $base_toolkit,
-    '#options' => $toolkits,
-    '#element_validate' => array('imageapi_optimize_toolkit_element_validate'),
-  );
-
-  $function = 'image_' . $base_toolkit . '_settings';
-  if (function_exists($function)) {
-    $return = $function();
-    if (is_array($return)) {
-      $form['imageapi_optimize_base_toolkit']['imageapi_optimize_toolkit_settings'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('@toolkit Settings', array('@toolkit' => $toolkits[$base_toolkit])),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      ) + $return;
-    }
-  }
-
-  // Services (3rd party and internal) settings.
-  $form['imageapi_optimize_service'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('ImageAPI Optimize Service'),
-  );
-
-  $form['imageapi_optimize_service']['imageapi_optimize_service'] = array(
-    '#type' => 'radios',
-    '#title' => t('Choose which optimization service to use'),
-    '#default_value' => variable_get('imageapi_optimize_service', 'internal'),
-    '#options' => array(),
-  );
-
-  uasort($info['services'], 'drupal_sort_weight');
-  foreach ($info['services'] as $name => $service) {
-    // Append this service to the available services.
-    $form['imageapi_optimize_service']['imageapi_optimize_service']['#options'][$name] = $service['title'];
-    if (isset($service['url'])) {
-      $form['imageapi_optimize_service']['imageapi_optimize_service']['#options'][$name] = l($service['title'], $service['url']);
-    }
-
-    // Build service form if required.
-    if (isset($service['callbacks']['form'])) {
-      // Include services file if defined and available.
-      if (isset($service['file'])) {
-        include_once $service['file'];
-      }
-
-      $return = $service['callbacks']['form']($info);
-      if (is_array($return)) {
-        $form['imageapi_optimize_service']['imageapi_optimize_' . $name] = array(
-          '#type' => 'fieldset',
-          '#title' => t('@service Settings', array('@service' => $service['title'])),
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-          '#states' => array(
-            'visible' => array(
-              ':input[name="imageapi_optimize_service"]' => array('value' => $name),
-            ),
-          ),
-        ) + $return;
-      }
-    }
-  }
-
-  // Reloads methods because user may change toolkit
-  $form['#submit'][] = '_imageapi_optimize_get_methods';
-
-  return $form;
-}
-
-/**
- * Validation callback for Base toolkit field.
- */
-function imageapi_optimize_toolkit_element_validate($element) {
-  if ($element['#value'] == 'imageapi_optimize') {
-    form_set_error($element['#name'], t('You must select a different toolkit from ImageAPI Optimize itself.'));
-  }
 }
 
 /**

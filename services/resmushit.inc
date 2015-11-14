@@ -10,7 +10,7 @@
  */
 function imageapi_optimize_services_resmushit_info() {
   return array(
-    'title' => t('ReSmush.it'),
+    'title' => t('reSmush.it'),
     'url' => 'http://resmush.it',
   );
 }

@@ -9,7 +9,7 @@
  */
 function imageapi_optimize_services_internal_info() {
   return array(
-    'title' => t('Internal tools (configurable below)'),
+    'title' => t('Internal tools'),
     'weight' => -10,
   );
 }
@@ -69,7 +69,9 @@ function imageapi_optimize_services_internal_form($info) {
 
     $op = '';
     if (!empty($binary['settings'])) {
-      $op = l(t('Advanced settings'), 'admin/config/media/image-toolkit/imageapi_optimize/' . $name);
+      $op = l(t('Advanced settings'), 'admin/config/media/imageapi-optimize/' . $name, array(
+        'query' => drupal_get_destination(),
+        ));
 
       $advanced_settings = isset($settings['settings']) ? $settings['settings'] : $binary['settings'];
       $form['types'][$binary['type']]['imageapi_optimize_' . $name]['settings'] = array(

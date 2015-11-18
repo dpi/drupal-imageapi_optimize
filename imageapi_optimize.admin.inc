@@ -34,7 +34,8 @@ function imageapi_optimize_settings($form, $form_state) {
         include_once $service['file'];
       }
 
-      $return = $service['callbacks']['form']($info);
+      $settings = variable_get('imageapi_optimize_' . $name, array());
+      $return = $service['callbacks']['form']($info, $settings);
       if (is_array($return)) {
         $form['imageapi_optimize_service']['imageapi_optimize_' . $name] = array(
             '#type' => 'fieldset',
@@ -51,5 +52,25 @@ function imageapi_optimize_settings($form, $form_state) {
     }
   }
 
+  $form['#submit'][] = 'imageapi_optimize_settings_form_submit';
   return system_settings_form($form);
+}
+
+function imageapi_optimize_settings_form_submit($form, &$form_state) {
+  $info = imageapi_optimize_info(TRUE);
+
+  uasort($info['services'], 'drupal_sort_weight');
+  foreach ($info['services'] as $name => $service) {
+    if (isset($service['callbacks']['form'])) {
+
+      if (isset($service['file'])) {
+        include_once $service['file'];
+      }
+
+      $func = $service['callbacks']['form'] . '_submit';
+      if (function_exists($func)) {
+        $form_state['values']['imageapi_optimize_' . $name] = $func($info, $form, $form_state);
+      }
+    }
+  }
 }

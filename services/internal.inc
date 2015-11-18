@@ -17,14 +17,14 @@ function imageapi_optimize_services_internal_info() {
 /**
  * Internal ImageAPI Optimize form callback.
  */
-function imageapi_optimize_services_internal_form($info) {
+function imageapi_optimize_services_internal_form($info, $settings) {
   $form = array();
   $form['types'] = array(
     '#type' => 'vertical_tabs',
   );
 
   foreach ($info['binaries'] as $name => $binary) {
-    $settings = variable_get('imageapi_optimize_' . $name, array());
+    $binary_settings = isset($settings[$name]) ? $settings[$name] : array();
 
     if (!isset($form['types'][$binary['type']])) {
       $form['types'][$binary['type']] = array(
@@ -42,7 +42,7 @@ function imageapi_optimize_services_internal_form($info) {
     $form['types'][$binary['type']]['imageapi_optimize_' . $name]['status'] = array(
       '#title' => t('Enabled'),
       '#type' => 'checkbox',
-      '#default_value' => isset($settings['status']) ? $settings['status'] : FALSE,
+      '#default_value' => isset($binary_settings['status']) ? $binary_settings['status'] : FALSE,
       '#title_display' => 'invisible',
     );
 
@@ -59,7 +59,7 @@ function imageapi_optimize_services_internal_form($info) {
     $form['types'][$binary['type']]['imageapi_optimize_' . $name]['path'] = array(
       '#type' => 'textfield',
       '#title' => t('Path to @name', array('@name' => $name)),
-      '#default_value' => isset($settings['path']) ? $settings['path'] : '',
+      '#default_value' => isset($binary_settings['path']) ? $binary_settings['path'] : '',
       '#element_validate' => array('imageapi_optimize_validate_path'),
       '#title_display' => 'invisible',
     );
@@ -73,7 +73,7 @@ function imageapi_optimize_services_internal_form($info) {
         'query' => drupal_get_destination(),
         ));
 
-      $advanced_settings = isset($settings['settings']) ? $settings['settings'] : $binary['settings'];
+      $advanced_settings = isset($binary_settings['settings']) ? $binary_settings['settings'] : $binary['settings'];
       $form['types'][$binary['type']]['imageapi_optimize_' . $name]['settings'] = array(
         '#type' => 'value',
         '#value' => $advanced_settings,
@@ -92,6 +92,18 @@ function imageapi_optimize_services_internal_form($info) {
   }
 
   return $form;
+}
+
+function imageapi_optimize_services_internal_form_submit($info, $form, &$form_state) {
+  $settings = array();
+  foreach ($info['binaries'] as $name => $binary) {
+    $key = 'imageapi_optimize_' . $name;
+    if (isset($form_state['values'][$key])) {
+      $settings[$name] = $form_state['values'][$key];
+      unset($form_state['values'][$key]);
+    }
+  }
+  return $settings;
 }
 
 /**
@@ -159,20 +171,20 @@ function imageapi_optimize_internal_binary_settings_title($name) {
 /**
  * Internal ImageAPI Optimize service callback.
  */
-function imageapi_optimize_services_internal($image, $dst) {
+function imageapi_optimize_services_internal($image, $dst, $settings) {
   $dst = drupal_realpath($dst);
 
   $info = imageapi_optimize_info();
   foreach ($info['binaries'] as $name => $binary) {
-    $settings = variable_get('imageapi_optimize_' . $name, array());
-    if (isset($settings['status']) && $settings['status'] && $settings['path']) {
+    $binary_settings = isset($settings[$name]) ? $settings[$name] : array();
+    if (isset($binary_settings['status']) && $binary_settings['status'] && $binary_settings['path']) {
       // Include binary file if defined and available.
       if (isset($binary['file'])) {
         include_once $binary['file'];
       }
 
-      $advanced_settings = isset($settings['settings']) ? $settings['settings'] : $binary['settings'];
-      $binary['callbacks']['process']($image, $dst, $settings['path'], $advanced_settings);
+      $advanced_settings = isset($binary_settings['settings']) ? $binary_settings['settings'] : $binary['settings'];
+      $binary['callbacks']['process']($image, $dst, $binary_settings['path'], $advanced_settings);
     }
   }
 

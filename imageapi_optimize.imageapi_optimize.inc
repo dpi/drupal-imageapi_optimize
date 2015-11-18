@@ -42,3 +42,17 @@ function _imageapi_optimize_info_scan($type) {
 
   return $info;
 }
+
+/**
+ * Implements hook_imageapi_optimize_processors().
+ */
+function imageapi_optimize_imageapi_optimize_processors() {
+  return array(
+    'resmushit' => array(
+      'handler' => array(
+        'label' => t('reSmush.it'),
+        'class' => 'ImageAPIOptimizeProcessorReSmushIt',
+      ),
+    ),
+  );
+}

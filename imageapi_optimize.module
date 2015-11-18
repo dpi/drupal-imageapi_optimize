@@ -14,6 +14,10 @@ function imageapi_optimize_hook_info() {
     'group' => 'imageapi_optimize',
   );
 
+  $hooks['imageapi_optimize_processors'] = array(
+    'group' => 'imageapi_optimize',
+  );
+
   return $hooks;
 }
 
@@ -57,18 +61,6 @@ function imageapi_optimize_menu() {
 }
 
 /**
- * Implements hook_image_toolkits().
- */
-function imageapi_optimize_image_toolkits() {
-  return array(
-    'imageapi_optimize' => array(
-      'title' => t('ImageAPI Optimize'),
-      'available' => FALSE,
-    ),
-  );
-}
-
-/**
  * Implements image_HOOK_save().
  */
 function image_imageapi_optimize_save(stdClass $image, $dst) {
@@ -106,7 +98,7 @@ function _imageapi_optimize_invoke($method, $image, array $params = array()) {
  */
 function _imageapi_optimize_optimize($image, $dst) {
   $info = imageapi_optimize_info();
-  $service = variable_get('imageapi_optimize_service', 'internal');
+  $service = isset($image->imageapi_optimize['service']) ? $image->imageapi_optimize['service'] : variable_get('imageapi_optimize_service', 'internal');
 
   if (isset($info['services'][$service])) {
     $service = $info['services'][$service];
@@ -114,7 +106,9 @@ function _imageapi_optimize_optimize($image, $dst) {
       include_once $service['file'];
     }
 
-    $service['callbacks']['process']($image, $dst);
+    $settings = isset($image->imageapi_optimize['settings']) ? $image->imageapi_optimize['settings'] : array();
+
+    $service['callbacks']['process']($image, $dst, $settings);
   }
 
   // If optimize service fails, there is no problem. Original image is saved.
@@ -205,6 +199,8 @@ function imageapi_optimize_image_effect_info() {
     'label' => t('ImageAPI Optimize'),
     'help' => t('This will optmize the image using the selected options, this should be the last effect in the preset'),
     'effect callback' => 'imageapi_optimize_optimize_effect',
+    'form callback' => 'imageapi_optimize_optimize_effect_form',
+    //'summary theme' => 'imageapi_optimize_optimize_effect_summary',
   );
 
   return $effects;
@@ -220,6 +216,34 @@ function imageapi_optimize_image_effect_info() {
 function imageapi_optimize_optimize_effect(stdClass $image, $options) {
   $image->original_toolkit = $image->toolkit;
   $image->toolkit = 'imageapi_optimize';
+
+  // Process the settings so that they're available later.
+  if (isset($options['setting_source']) && $options['setting_source'] == 'style') {
+    // Settings come from this image style.
+  }
+  else {
+    // Settings come from the global settings.
+    $image->imageapi_optimize['service'] = variable_get('imageapi_optimize_service', 'internal');
+    $image->imageapi_optimize['settings'] = variable_get('imageapi_optimize_' . $image->imageapi_optimize['service'], array());
+  }
+}
+
+function imageapi_optimize_optimize_effect_form($data) {
+  $form = array();
+
+  $form['setting_source'] = array(
+    '#type' => 'radios',
+    '#title' => t('Settings'),
+    '#options' => array(
+      'global' => t('Use global settings'),
+      'style' => t('Style specific settings'),
+    ),
+    '#default_value' => isset($data['setting_source']) ? $data['setting_source'] : 'global',
+  );
+
+
+
+  return $form;
 }
 
 /**
@@ -272,5 +296,23 @@ function imageapi_optimize_form_image_style_validate($form, &$form_state) {
 
   if (isset($imageapi_optimize_effects_id) && !empty($weights)) {
     form_set_value($form['effects'][$imageapi_optimize_effects_id]['weight'], max($weights) + 1, $form_state);
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function imageapi_optimize_ctools_plugin_type() {
+  return array(
+    'processors' => array(
+      'use hooks' => TRUE,
+    ),
+  );
+}
+
+function imageapi_optimize_get_processor($id) {
+  ctools_include('plugins');
+  if ($class = ctools_plugin_load_class('imageapi_optimize', 'processors', $id, 'handler')) {
+    return new $class();
   }
 }

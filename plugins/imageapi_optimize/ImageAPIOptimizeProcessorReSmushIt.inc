@@ -12,4 +12,22 @@ class ImageAPIOptimizeProcessorReSmushIt {
       $this->$field = empty($info['serialize']) ? $data->$field : unserialize($data->$field);
     }
   }
+
+  protected $position;
+
+  /**
+   * @return integer
+   */
+  public function getPosition() {
+    return isset($this->position) ? $this->position : 0;
+  }
+
+
+  public function getLabel() {
+    return 'reSmush.it';
+  }
+
+  public function getOptionsDescription() {
+    return 'Connect timeout @count seconds';
+  }
 }

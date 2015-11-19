@@ -339,7 +339,8 @@ function imageapi_optmize_list_of_processors() {
 }
 
 function example_ctools_export_ui_form(&$form, &$form_state) {
-  // This needs to:
+  /* @var ImageAPIOptimizePipeline $pipeline */
+  $pipeline = &$form_state['item'];
 
   // 1. Provide a nice UI for adding a new processor to this pipeline.
   $form['add_new_processor'] = array(
@@ -360,18 +361,82 @@ function example_ctools_export_ui_form(&$form, &$form_state) {
     ),
   );
 
+  $form['processors'] = array(
+    '#tree' => TRUE,
+  );
+
+  foreach ($pipeline->getProcessors() as $i => $processor) {
+    $form['processors'][$i]['position'] = array(
+      '#type' => 'weight',
+      '#title' => t('Order'),
+      '#range' => 25,
+      '#default_value' => $processor->getPosition(),
+    );
+
+    $form['processors'][$i]['label'] = array(
+      '#type' => 'item',
+      '#markup' => $processor->getLabel(),
+    );
+
+    $form['processors'][$i]['description'] = array(
+      '#type' => 'item',
+      '#markup' => $processor->getOptionsDescription(),
+    );
+
+    $form['processors'][$i]['_remove'] = array(
+      '#type' => 'submit',
+      '#name' => 'processor_remove_' . $i,
+      '#value' => t('Remove'),
+      '#submit' => array(
+        'imageapi_optimize_pipeline_edit_remove_processor_submit',
+      ),
+      '#index' => $i,
+    );
+  }
 
 
-  // 2. Provide a machanism for removing a processor from the pipeline.
   // 3. Provice a way to configure each processor in the pipeline.
-  // 4. Provide a way to re-order the processors.
+}
+
+function imageapi_optimize_pipeline_edit_remove_processor_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  /* @var ImageAPIOptimizePipeline $pipeline */
+  $pipeline = &$form_state['item'];
+
+  $pipeline->removeProcessor($form_state['triggering_element']['#index']);
 }
 
 function imageapi_optimize_pipeline_edit_add_new_processor_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
+  /* @var ImageAPIOptimizePipeline $pipeline */
+  $pipeline = &$form_state['item'];
+
+  $pipeline->addProcessor($form_state['values']['new_processor_select']);
 }
 
 class ImageAPIOptimizePipeline {
+
+  var $processor;
+  public function addProcessor($name) {
+    $object_class = imageapi_optimize_get_processor($name);
+    $object = new $object_class();
+    $this->processor[] = $object;
+    return $object;
+  }
+
+  public function removeProcessor($index) {
+    unset($this->processor[$index]);
+  }
+
+  /**
+   * @return mixed
+   */
+  public function getProcessors() {
+    return $this->processor;
+  }
+
+
+
 
 }
 

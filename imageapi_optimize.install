@@ -29,6 +29,8 @@ function imageapi_optimize_schema() {
       'identifier' => 'pipline', // Exports will be as $myobj
       'default hook' => 'imageapi_optimize_pipeline',  // Function hook name.
       'object' => 'ImageAPIOptimizePipeline',
+      // the callback to load the displays
+      'subrecords callback' => 'imageapi_optimize_load_processor_records',
       'api' => array(
         'owner' => 'imageapi_optimize',
         'api' => 'imageapi_optimize',  // Base name for api include files.
@@ -62,6 +64,39 @@ function imageapi_optimize_schema() {
     'unique keys' => array(
       'machine_name' => array('machine_name'),
     ),
+  );
+
+  $schema['imageapi_optimize_pipeline_processor'] = array(
+    'description' => 'Processors for pipelines',
+    'fields' => array(
+      'pid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Pipeline ID',
+      ),
+      'processor' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The processor plugin ID.',
+      ),
+      'position' => array(
+        'type' => 'int',
+        'default' => 0,
+        'description' => 'The order in which this processor is loaded.',
+      ),
+      'processor_options' => array(
+        'type' => 'blob',
+        'description' => 'A serialized array of options for this display; it contains options that are generally only pertinent to that display plugin type.',
+        'serialize' => TRUE,
+        'serialized default' => 'a:0:{}',
+      ),
+    ),
+    //'primary key' => array('pi),
+//    'unique keys' => array(
+//      'machine_name' => array('machine_name'),
+//    ),
   );
 
   return $schema;

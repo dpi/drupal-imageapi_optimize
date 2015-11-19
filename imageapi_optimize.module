@@ -323,10 +323,92 @@ function imageapi_optimize_get_processor($id) {
   }
 }
 
+function imageapi_optmize_list_of_processors() {
+  $options = array();
+
+  ctools_include('plugins');
+  $processors = ctools_get_plugins('imageapi_optimize', 'processors');
+  if (is_array($processors)) {
+    foreach ($processors as $processor) {
+      $options[$processor['name']] = $processor['label'];
+    }
+  }
+
+  return $options;
+
+}
+
 function example_ctools_export_ui_form(&$form, &$form_state) {
-  $foo = 'f';
+  // This needs to:
+
+  // 1. Provide a nice UI for adding a new processor to this pipeline.
+  $form['add_new_processor'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Add new processor'),
+  );
+
+  $form['add_new_processor']['new_processor_select'] = array(
+    '#type' => 'select',
+    '#options' => imageapi_optmize_list_of_processors(),
+  );
+
+  $form['add_new_processor']['new_processor_add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add new processor'),
+    '#submit' => array(
+      'imageapi_optimize_pipeline_edit_add_new_processor_submit',
+    ),
+  );
+
+
+
+  // 2. Provide a machanism for removing a processor from the pipeline.
+  // 3. Provice a way to configure each processor in the pipeline.
+  // 4. Provide a way to re-order the processors.
+}
+
+function imageapi_optimize_pipeline_edit_add_new_processor_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
 }
 
 class ImageAPIOptimizePipeline {
 
+}
+
+/**
+ * Export callback to load the view subrecords, which are the displays.
+ */
+function imageapi_optimize_load_processor_records(&$pipelines) {
+  // Get vids from the views.
+  $names = array();
+  foreach ($pipelines as $pipeline) {
+    if (empty($pipeline->processors)) {
+      $names[$pipeline->pid] = $pipeline->machine_name;
+    }
+  }
+
+  if (empty($names)) {
+    return;
+  }
+
+  foreach (array('processor') as $key) {
+    $object_name = "imageapi_optimize_pipeline_$key";
+    $result = db_query("SELECT * FROM {{$object_name}} WHERE pid IN (:pids) ORDER BY pid, position",
+      array(':pids' => array_keys($names)));
+
+    foreach ($result as $data) {
+      $object_class = imageapi_optimize_get_processor($data->processor);
+      $object = new $object_class();
+
+      $object->load_row($data);
+
+      // Because it can get complicated with this much indirection,
+      // make a shortcut reference.
+      $location = &$pipelines[$names[$object->pid]]->$key;
+
+      // If we have a basic id field, load the item onto the view based on
+      // this ID, otherwise push it on.
+      $location[] = $object;
+    }
+  }
 }

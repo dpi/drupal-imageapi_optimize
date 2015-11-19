@@ -49,8 +49,8 @@ function _imageapi_optimize_info_scan($type) {
 function imageapi_optimize_imageapi_optimize_processors() {
   return array(
     'resmushit' => array(
+      'label' => t('reSmush.it'),
       'handler' => array(
-        'label' => t('reSmush.it'),
         'class' => 'ImageAPIOptimizeProcessorReSmushIt',
       ),
     ),

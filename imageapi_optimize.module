@@ -310,9 +310,23 @@ function imageapi_optimize_ctools_plugin_type() {
   );
 }
 
+function imageapi_optimize_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'export_ui') {
+    return 'plugins/' . $plugin;
+  }
+}
+
 function imageapi_optimize_get_processor($id) {
   ctools_include('plugins');
   if ($class = ctools_plugin_load_class('imageapi_optimize', 'processors', $id, 'handler')) {
     return new $class();
   }
+}
+
+function example_ctools_export_ui_form(&$form, &$form_state) {
+  $foo = 'f';
+}
+
+class ImageAPIOptimizePipeline {
+
 }

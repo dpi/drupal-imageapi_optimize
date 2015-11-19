@@ -15,6 +15,59 @@ function imageapi_optimize_uninstall() {
 }
 
 /**
+ * Implements hook_schema().
+ */
+function imageapi_optimize_schema() {
+  $schema = array();
+
+  $schema['imageapi_optimize_pipeline'] = array(
+    'description' => 'Pipelines for the imageapi optimize',
+    'export' => array(
+      'key' => 'machine_name',
+      'key name' => 'Machine Name',
+      'primary key' => 'pid',
+      'identifier' => 'pipline', // Exports will be as $myobj
+      'default hook' => 'imageapi_optimize_pipeline',  // Function hook name.
+      'object' => 'ImageAPIOptimizePipeline',
+      'api' => array(
+        'owner' => 'imageapi_optimize',
+        'api' => 'imageapi_optimize',  // Base name for api include files.
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+      // If the key is stored in a table that is joined in, specify it:
+      //'key in table' => 'my_join_table',
+
+    ),
+    'fields' => array(
+      'pid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        'no export' => TRUE, // Do not export database-only keys.
+      ),
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'description' => 'Unique ID for this pipeline. Used to identify it programmatically.',
+      ),
+      'admin_title' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'description' => 'Unique ID for this pipeline. Used to identify it programmatically.',
+      ),
+    ),
+    'primary key' => array('pid'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
  * Upgrade variables.
  */
 function imageapi_optimize_update_7000() {

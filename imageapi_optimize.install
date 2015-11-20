@@ -20,83 +20,83 @@ function imageapi_optimize_uninstall() {
 function imageapi_optimize_schema() {
   $schema = array();
 
-  $schema['imageapi_optimize_pipeline'] = array(
-    'description' => 'Pipelines for the imageapi optimize',
-    'export' => array(
-      'key' => 'machine_name',
-      'key name' => 'Machine Name',
-      'primary key' => 'pid',
-      'identifier' => 'pipline', // Exports will be as $myobj
-      'default hook' => 'imageapi_optimize_pipeline',  // Function hook name.
-      'object' => 'ImageAPIOptimizePipeline',
-      // the callback to load the displays
-      'subrecords callback' => 'imageapi_optimize_load_processor_records',
-      'api' => array(
-        'owner' => 'imageapi_optimize',
-        'api' => 'imageapi_optimize',  // Base name for api include files.
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-      // If the key is stored in a table that is joined in, specify it:
-      //'key in table' => 'my_join_table',
-
-    ),
+  $schema['imageapi_optimize_pipelines'] = array(
+    'description' => 'Stores configuration options for imageapi_optimize pipelines.',
     'fields' => array(
-      'pid' => array(
+      'isid' => array(
+        'description' => 'The primary identifier for an imageapi_optimize pipeline.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
-        'no export' => TRUE, // Do not export database-only keys.
       ),
-      'machine_name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'description' => 'Unique ID for this pipeline. Used to identify it programmatically.',
-      ),
-      'admin_title' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'description' => 'Unique ID for this pipeline. Used to identify it programmatically.',
-      ),
-    ),
-    'primary key' => array('pid'),
-    'unique keys' => array(
-      'machine_name' => array('machine_name'),
-    ),
-  );
-
-  $schema['imageapi_optimize_pipeline_processor'] = array(
-    'description' => 'Processors for pipelines',
-    'fields' => array(
-      'pid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Pipeline ID',
-      ),
-      'processor' => array(
+      'name' => array(
+        'description' => 'The pipeline machine name.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'description' => 'The processor plugin ID.',
       ),
-      'position' => array(
-        'type' => 'int',
-        'default' => 0,
-        'description' => 'The order in which this processor is loaded.',
-      ),
-      'processor_options' => array(
-        'type' => 'blob',
-        'description' => 'A serialized array of options for this display; it contains options that are generally only pertinent to that display plugin type.',
-        'serialize' => TRUE,
-        'serialized default' => 'a:0:{}',
+      'label' => array(
+        'description' => 'The pipeline administrative name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
     ),
-    //'primary key' => array('pi),
-//    'unique keys' => array(
-//      'machine_name' => array('machine_name'),
-//    ),
+    'primary key' => array('isid'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  $schema['imageapi_optimize_processors'] = array(
+    'description' => 'Stores configuration options for imageapi_optimize processors.',
+    'fields' => array(
+      'ieid' => array(
+        'description' => 'The primary identifier for an imageapi_optimize processor.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'isid' => array(
+        'description' => 'The {imageapi_optimize_pipelines}.isid for an imageapi_optimize pipeline.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'weight' => array(
+        'description' => 'The weight of the processor in the pipeline.',
+        'type' => 'int',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => 'The unique name of the processor to be executed.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'The configuration data for the processor.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('ieid'),
+    'indexes' => array(
+      'isid' => array('isid'),
+      'weight' => array('weight'),
+    ),
+    'foreign keys' => array(
+      'imageapi_optimize_pipelines' => array(
+        'table' => 'imageapi_optimize_pipelines',
+        'columns' => array('isid' => 'isid'),
+      ),
+    ),
   );
 
   return $schema;

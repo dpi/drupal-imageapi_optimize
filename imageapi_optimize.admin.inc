@@ -74,12 +74,13 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
     '#theme' => 'imageapi_optimize_pipeline_processors',
   );
   foreach ($pipeline['processors'] as $key => $processor) {
+    $processor_handler = imageapi_optimize_processor_handler($processor);
     $form['processors'][$key]['#weight'] = isset($form_state['input']['processors']) ? $form_state['input']['processors'][$key]['weight'] : NULL;
     $form['processors'][$key]['label'] = array(
       '#markup' => $processor['label'],
     );
     $form['processors'][$key]['summary'] = array(
-      '#markup' => isset($processor['summary theme']) ? theme($processor['summary theme'], array('data' => $processor['data'])) : '',
+      '#markup' => $processor_handler->getDescription(),
     );
     $form['processors'][$key]['weight'] = array(
       '#type' => 'weight',
@@ -96,7 +97,7 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
         '#type' => 'link',
         '#title' => t('edit'),
         '#href' => 'admin/config/media/imageapi-optimize/edit/' . $pipeline['name'] . '/processors/' . $processor['ieid'],
-        '#access' => $editable && isset($processor['form callback']),
+        '#access' => $editable && is_a($processor_handler, 'ImageAPIOptimizeProcessorConfigurableInterface'),
       );
       $form['processors'][$key]['remove'] = array(
         '#type' => 'link',
@@ -387,17 +388,16 @@ function imageapi_optimize_processor_form($form, &$form_state, $pipeline, $proce
 
   $form_state['pipeline'] = $pipeline;
   $form_state['processor'] = $processor;
+  $processor_handler = imageapi_optimize_processor_handler($processor);
 
   // If no configuration for this image effect, return to the image style page.
-  if (!isset($processor['form callback'])) {
+  if (!is_a($processor_handler, 'ImageAPIOptimizeProcessorConfigurableInterface')) {
     drupal_goto('admin/config/media/imageapi-optimize/edit/' . $pipeline['name']);
   }
 
   $form['#tree'] = TRUE;
   $form['#attached']['css'][drupal_get_path('module', 'image') . '/image.admin.css'] = array();
-  if (function_exists($processor['form callback'])) {
-    $form['data'] = call_user_func($processor['form callback'], $processor['data']);
-  }
+  $form['data'] = $processor_handler->configForm();
 
   // Check the URL for a weight, then the image effect, otherwise use default.
   $form['weight'] = array(

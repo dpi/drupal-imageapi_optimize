@@ -701,18 +701,11 @@ function _imageapi_optimize_invoke($method, $image, array $params = array()) {
  * Optimizes image with external commands
  */
 function _imageapi_optimize_optimize($image, $dst) {
-  $info = imageapi_optimize_info();
-  $service = isset($image->imageapi_optimize['service']) ? $image->imageapi_optimize['service'] : variable_get('imageapi_optimize_service', 'internal');
-
-  if (isset($info['services'][$service])) {
-    $service = $info['services'][$service];
-    if (isset($service['file'])) {
-      include_once $service['file'];
+  if (isset($image->imageapi_optimize_pipeline) && ($pipeline = imageapi_optimize_pipeline_load($image->imageapi_optimize_pipeline))) {
+    foreach ($pipeline['processors'] as $processor) {
+      $processor_handler = imageapi_optimize_processor_handler($processor);
+      $processor_handler->process($image, $dst);
     }
-
-    $settings = isset($image->imageapi_optimize['settings']) ? $image->imageapi_optimize['settings'] : array();
-
-    $service['callbacks']['process']($image, $dst, $settings);
   }
 
   // If optimize service fails, there is no problem. Original image is saved.
@@ -816,5 +809,24 @@ function imageapi_optimize_form_image_style_validate($form, &$form_state) {
 
   if (isset($imageapi_optimize_effects_id) && !empty($weights)) {
     form_set_value($form['effects'][$imageapi_optimize_effects_id]['weight'], max($weights) + 1, $form_state);
+  }
+}
+
+
+function imageapi_optimize_processor_handler($processor) {
+  $handler_class = $processor['handler'];
+  $handler = new $handler_class($processor['data']);
+  return $handler;
+}
+
+function imageapi_optimize_processor_integer_validate($element, &$form_state) {
+  $value = empty($element['#allow_negative']) ? $element['#value'] : preg_replace('/^-/', '', $element['#value']);
+  if ($element['#value'] != '' && (!is_numeric($value) || intval($value) <= 0)) {
+    if (empty($element['#allow_negative'])) {
+      form_error($element, t('!name must be an integer.', array('!name' => $element['#title'])));
+    }
+    else {
+      form_error($element, t('!name must be a positive integer.', array('!name' => $element['#title'])));
+    }
   }
 }

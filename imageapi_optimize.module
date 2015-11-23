@@ -73,7 +73,7 @@ function imageapi_optimize_menu() {
     'description' => 'Delete an imageapi optimize pipeline.',
     'load arguments' => array(NULL, (string) IMAGE_STORAGE_NORMAL),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('image_style_delete_form', 5),
+    'page arguments' => array('imageapi_optimize_pipeline_delete_form', 5),
     'access arguments' => array('administer imageapi optimize'),
     'file' => 'imageapi_optimize.admin.inc',
   );
@@ -408,7 +408,15 @@ function imageapi_optimize_pipeline_flush($pipeline) {
   drupal_static_reset('imageapi_optimize_pipelines');
   drupal_static_reset('imageapi_optimize_processors');
 
-  // @TODO: Should we flush all image styles using this pipeline?
+  // Flush all the image styles using this pipeline.
+  $styles = image_styles();
+  foreach ($styles as $style) {
+    foreach ($style['effects'] as $effect) {
+      if (($effect['name'] == 'imageapi_optimize') && isset($effect['data']['pipeline']) && ($effect['data']['pipeline'] == $pipeline['name'])) {
+        image_style_flush($style);
+      }
+    }
+  }
 }
 
 /**
@@ -704,7 +712,7 @@ function _imageapi_optimize_optimize($image, $dst) {
   if (isset($image->imageapi_optimize_pipeline) && ($pipeline = imageapi_optimize_pipeline_load($image->imageapi_optimize_pipeline))) {
     foreach ($pipeline['processors'] as $processor) {
       $processor_handler = imageapi_optimize_processor_handler($processor);
-      $processor_handler->process($image, $dst);
+      $processor_handler->process($image, drupal_realpath($dst));
     }
   }
 

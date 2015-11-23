@@ -5,4 +5,8 @@ core = 7.x
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorInterface.inc
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorConfigurableInterface.inc
 
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorBinary.inc
+
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorReSmushIt.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJpegOptim.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJpegTran.inc

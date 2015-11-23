@@ -8,5 +8,12 @@ files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorConfigurableInterfa
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorBinary.inc
 
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorReSmushIt.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorAdvDef.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorAdvPng.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJfifRemove.inc
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJpegOptim.inc
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJpegTran.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorOptiPng.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorPngCrush.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorPngOut.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorPngQuant.inc

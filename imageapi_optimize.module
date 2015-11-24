@@ -4,6 +4,8 @@
  * Image optimize functionalities
  */
 
+include_once dirname(__FILE__) . '/imageapi_optimize.features.inc';
+
 /**
  * Image style constant for user presets in the database.
  */
@@ -71,7 +73,7 @@ function imageapi_optimize_menu() {
   $items['admin/config/media/imageapi-optimize/delete/%imageapi_optimize_pipeline'] = array(
     'title' => 'Delete pipeline',
     'description' => 'Delete an imageapi optimize pipeline.',
-    'load arguments' => array(NULL, (string) IMAGE_STORAGE_NORMAL),
+    'load arguments' => array(NULL, (string) IMAGEAPI_OPTIMIZE_STORAGE_NORMAL),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('imageapi_optimize_pipeline_delete_form', 5),
     'access arguments' => array('administer imageapi optimize'),
@@ -80,7 +82,7 @@ function imageapi_optimize_menu() {
   $items['admin/config/media/imageapi-optimize/revert/%imageapi_optimize_pipeline'] = array(
     'title' => 'Revert style',
     'description' => 'Revert an imageapi optimize pipeline.',
-    'load arguments' => array(NULL, (string) IMAGEAPI_OPTIMIZE_STORAGE_NORMAL),
+    'load arguments' => array(NULL, (string) IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('imageapi_optimize_pipeline_revert_form', 5),
     'access arguments' => array('administer imageapi optimize'),

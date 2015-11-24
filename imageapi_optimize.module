@@ -147,15 +147,6 @@ function imageapi_optimize_permission() {
 }
 
 /**
- * Implements hook_imageapi_optimize_default_pipelines().
- */
-function imageapi_optimize_imageapi_optimize_default_pipelines() {
-  $pipelines = array();
-
-  return $pipelines;
-}
-
-/**
  * Gets an array of all styles and their settings.
  *
  * @return
@@ -659,16 +650,25 @@ function _imageapi_optimize_processor_definitions_sort($a, $b) {
 function imageapi_optimize_hook_info() {
   $hooks = array();
 
+  $group = 'imageapi_optimize';
   $hooks['imageapi_optimize_info'] = array(
-    'group' => 'imageapi_optimize',
+    'group' => $group,
   );
 
   $hooks['imageapi_optimize_processors'] = array(
-    'group' => 'imageapi_optimize',
+    'group' => $group,
   );
 
   $hooks['imageapi_optimize_processor_info'] = array(
-    'group' => 'imageapi_optimize',
+    'group' => $group,
+  );
+
+  $hooks['imageapi_optimize_default_pipelines'] = array(
+    'group' => $group,
+  );
+
+  $hooks['imageapi_optimize_pipelines_alter'] = array(
+    'group' => $group,
   );
 
   return $hooks;

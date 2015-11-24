@@ -39,7 +39,7 @@ function imageapi_optimize_imageapi_optimize_processor_info() {
       'handler' => 'ImageAPIOptimizeProcessorJpegOptim',
     ),
     'imageapi_optimize_jpegtran' => array(
-      'label' => t('Jpeg Tran'),
+      'label' => t('JPEGTran'),
       'url' => 'http://ijg.org/',
       'help' => t('Use Jpeg Tran to optimise the image.'),
       'handler' => 'ImageAPIOptimizeProcessorJpegTran',
@@ -71,4 +71,77 @@ function imageapi_optimize_imageapi_optimize_processor_info() {
   );
 
   return $processors;
+}
+
+/**
+ * Implements hook_imageapi_optimize_default_pipelines().
+ */
+function imageapi_optimize_imageapi_optimize_default_pipelines() {
+  $pipelines = array();
+
+  // Exported imageapi optimize pipeline: resmush_it.
+  $pipelines['resmush_it'] = array(
+    'label' => 'reSmush.it',
+    'processors' => array(
+      array(
+        'name' => 'imageapi_optimize_resmushit',
+        'data' => array(),
+        'weight' => 0,
+      ),
+    ),
+  );
+
+  // Exported imageapi optimize pipeline: local_binaries.
+  $pipelines['local_binaries'] = array(
+    'label' => 'Local binaries',
+    'processors' => array(
+      array(
+        'name' => 'imageapi_optimize_jpegoptim',
+        'data' => array(),
+        'weight' => 0,
+      ),
+      array(
+        'name' => 'imageapi_optimize_jpegtran',
+        'data' => array(),
+        'weight' => 0,
+      ),
+      array(
+        'name' => 'imageapi_optimize_pngquant',
+        'data' => array(),
+        'weight' => 0,
+      ),
+      array(
+        'name' => 'imageapi_optimize_jfifremove',
+        'data' => array(),
+        'weight' => 1,
+      ),
+      array(
+        'name' => 'imageapi_optimize_optipng',
+        'data' => array(),
+        'weight' => 1,
+      ),
+      array(
+        'name' => 'imageapi_optimize_pngcrush',
+        'data' => array(),
+        'weight' => 2,
+      ),
+      array(
+        'name' => 'imageapi_optimize_advpng',
+        'data' => array(),
+        'weight' => 3,
+      ),
+      array(
+        'name' => 'imageapi_optimize_advdef',
+        'data' => array(),
+        'weight' => 4,
+      ),
+      array(
+        'name' => 'imageapi_optimize_pngout',
+        'data' => array(),
+        'weight' => 5,
+      ),
+    ),
+  );
+
+  return $pipelines;
 }

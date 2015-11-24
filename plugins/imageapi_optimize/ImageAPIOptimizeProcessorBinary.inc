@@ -60,6 +60,19 @@ abstract class ImageAPIOptimizeProcessorBinary {
     }
   }
 
+  /**
+   * Sanitize the given path for binary processors.
+   *
+   * @param $drupal_filepath
+   *   The file path to sanitize.
+   *
+   * @return string
+   *   The sanitized file path.
+   */
+  protected function sanitizeFilename($drupal_filepath) {
+    return drupal_realpath($drupal_filepath);
+  }
+
   protected function saveCommandStdoutToFile($cmd, $dst) {
     ob_start();
     passthru($cmd);

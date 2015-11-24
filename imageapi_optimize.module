@@ -677,49 +677,57 @@ function imageapi_optimize_hook_info() {
 /**
  * Implements image_HOOK_save().
  */
-function image_imageapi_optimize_save(stdClass $image, $dst) {
-  if (_imageapi_optimize_invoke('save', $image, array($dst))) {
-    $return = _imageapi_optimize_optimize($image, $dst);
-  }
-  else {
-    $return = FALSE;
+function image_imageapi_optimize_save(stdClass $image, $destination) {
+  // This property is set by imageapi_optimize_optimize_effect().
+  if (isset($image->imageapi_optimize_original_toolkit) && isset($image->imageapi_optimize_pipeline) && $image->toolkit != $image->imageapi_optimize_original_toolkit) {
+
+    // Cleanup our $image object.
+    $original_toolkit = $image->imageapi_optimize_original_toolkit;
+    $pipeline = $image->imageapi_optimize_pipeline;
+    unset($image->imageapi_optimize_original_toolkit);
+    unset($image->imageapi_optimize_pipeline);
+    $image->toolkit = $original_toolkit;
+
+    // Save the image with the original toolkit, and then optimize.
+    if (image_toolkit_invoke('save', $image, array($destination))) {
+      imageapi_optimize_optimize_file($pipeline, $destination, $image);
+      // Failure to optimize means the original image will still be in place.
+      return TRUE;
+    }
   }
 
-  // Remove our magic.
-  $image->toolkit = $toolkit = isset($image->original_toolkit) ? $image->original_toolkit : variable_get('imageapi_optimize_toolkit', '');
-  unset($image->original_toolkit);
-
-  return $return;
-}
-
-/**
- * Helper. Based on image_toolkit_invoke().
- *
- * @see imageapi_optimize_optimize_effect
- */
-function _imageapi_optimize_invoke($method, $image, array $params = array()) {
-  $toolkit = isset($image->original_toolkit) ? $image->original_toolkit : variable_get('imageapi_optimize_toolkit', '');
-  $function = 'image_' . $toolkit . '_' . $method;
-  if (function_exists($function)) {
-    array_unshift($params, $image);
-    return call_user_func_array($function, $params);
-  }
   return FALSE;
 }
 
 /**
- * Optimizes image with external commands
+ * Optimize an image through a specified pipeline.
+ *
+ * @param $pipeline
+ *   The machine name of the pipeline to optimize the image with.
+ * @param $drupal_filepath
+ *   The path to the image to be optimized.
+ * @param $image
+ *   Optional, the return value from image_load for the $drupal_filepath.
+ *
+ * @return bool
+ *   Return TRUE or FALSE indicating success or failure to optimize the image,
+ *   respectively.
  */
-function _imageapi_optimize_optimize($image, $dst) {
-  if (isset($image->imageapi_optimize_pipeline) && ($pipeline = imageapi_optimize_pipeline_load($image->imageapi_optimize_pipeline))) {
+function imageapi_optimize_optimize_file($pipeline, $drupal_filepath, $image = NULL) {
+  $return = TRUE;
+
+  if ($pipeline = imageapi_optimize_pipeline_load($pipeline)) {
+    if (is_null($image)) {
+      $image = image_load($drupal_filepath);
+    }
+
     foreach ($pipeline['processors'] as $processor) {
       $processor_handler = imageapi_optimize_processor_handler($processor);
-      $processor_handler->process($image, drupal_realpath($dst));
+      $return = $return && $processor_handler->process($image, $drupal_filepath);
     }
   }
 
-  // If optimize service fails, there is no problem. Original image is saved.
-  return TRUE;
+  return $return;
 }
 
 
@@ -748,8 +756,8 @@ function imageapi_optimize_image_effect_info() {
  * our function image_imageapi_optimize_save() is called.
  */
 function imageapi_optimize_optimize_effect(stdClass $image, $options) {
-  if (!empty($options['pipeline'])) {
-    $image->original_toolkit = $image->toolkit;
+  if (!empty($options['pipeline']) && imageapi_optimize_pipeline_load($options['pipeline'])) {
+    $image->imageapi_optimize_original_toolkit = $image->toolkit;
     $image->toolkit = 'imageapi_optimize';
     $image->imageapi_optimize_pipeline = $options['pipeline'];
   }
@@ -822,13 +830,29 @@ function imageapi_optimize_form_image_style_validate($form, &$form_state) {
   }
 }
 
-
-function imageapi_optimize_processor_handler($processor) {
+/**
+ * Get the handler class for a given processor.
+ *
+ * @param array $processor
+ *   The processor to get the handler for.
+ *
+ * @return ImageAPIOptimizeProcessorInterface
+ *   An instance of a imageapi optimize handler class.
+ */
+function imageapi_optimize_processor_handler(array $processor) {
   $handler_class = $processor['handler'];
   $handler = new $handler_class($processor['data']);
   return $handler;
 }
 
+/**
+ * Form element validation function, ensures that value is an integer.
+ *
+ * @param $element
+ *   The form element being validated.
+ * @param $form_state
+ *   The form state collection of the form element being validated.
+ */
 function imageapi_optimize_processor_integer_validate($element, &$form_state) {
   $value = empty($element['#allow_negative']) ? $element['#value'] : preg_replace('/^-/', '', $element['#value']);
   if ($element['#value'] != '' && (!is_numeric($value) || intval($value) <= 0)) {

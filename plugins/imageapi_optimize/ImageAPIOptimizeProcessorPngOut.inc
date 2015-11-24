@@ -11,7 +11,7 @@ class ImageAPIOptimizeProcessorPngOut extends ImageAPIOptimizeProcessorBinary im
     return '';
   }
 
-  public function process($image, $dst) {
+  public function process($image, $destination) {
     if ($this->getManualExecutablePath()) {
       $cmd = $this->getManualExecutablePath();
     }
@@ -22,6 +22,7 @@ class ImageAPIOptimizeProcessorPngOut extends ImageAPIOptimizeProcessorBinary im
     if (empty($cmd)) {
       return FALSE;
     }
+    $dst = $this->sanitizeFilename($destination);
 
     if ($image->info['mime_type'] == 'image/png') {
       $options = array(

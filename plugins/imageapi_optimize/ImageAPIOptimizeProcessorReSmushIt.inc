@@ -50,7 +50,7 @@ class ImageAPIOptimizeProcessorReSmushIt implements ImageAPIOptimizeProcessorCon
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
     curl_setopt($ch, CURLOPT_POST, TRUE);
     if (!class_exists('CURLFile')) {
-      $arg = array('files' => '@' . $dst);
+      $arg = array('files' => '@' . drupal_realpath($dst));
     }
     else {
       $cfile = new CURLFile($dst);

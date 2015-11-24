@@ -44,7 +44,7 @@ class ImageAPIOptimizeProcessorJpegTran extends ImageAPIOptimizeProcessorBinary 
     return $form;
   }
 
-  public function process($image, $dst) {
+  public function process($image, $destination) {
     if ($this->getManualExecutablePath()) {
       $cmd = $this->getManualExecutablePath();
     }
@@ -55,6 +55,7 @@ class ImageAPIOptimizeProcessorJpegTran extends ImageAPIOptimizeProcessorBinary 
     if (empty($cmd)) {
       return FALSE;
     }
+    $dst = $this->sanitizeFilename($destination);
 
     if ($image->info['mime_type'] == 'image/jpeg') {
       $options = array(

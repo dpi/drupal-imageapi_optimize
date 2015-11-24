@@ -67,7 +67,7 @@ class ImageAPIOptimizeProcessorOptiPng extends ImageAPIOptimizeProcessorBinary i
     return $form;
   }
 
-  public function process($image, $dst) {
+  public function process($image, $destination) {
     if ($this->getManualExecutablePath()) {
       $cmd = $this->getManualExecutablePath();
     }
@@ -78,6 +78,7 @@ class ImageAPIOptimizeProcessorOptiPng extends ImageAPIOptimizeProcessorBinary i
     if (empty($cmd)) {
       return FALSE;
     }
+    $dst = $this->sanitizeFilename($destination);
 
     if ($image->info['mime_type'] == 'image/png') {
       $options = array(

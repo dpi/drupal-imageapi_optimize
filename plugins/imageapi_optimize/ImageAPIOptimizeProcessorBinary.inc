@@ -1,14 +1,31 @@
 <?php
 
-abstract class ImageAPIOptimizeProcessorBinary {
+abstract class ImageAPIOptimizeProcessorBinary implements ImageAPIOptimizeProcessorConfigurableInterface {
   protected $manual_executable_path;
 
-  /**
-   * ImageAPIOptimizeProcessorReSmushIt constructor.
-   */
   public function __construct($data) {
     if (isset($data['manual_executable_path'])) {
       $this->manual_executable_path = $data['manual_executable_path'];
+    }
+  }
+
+  public function getDescription() {
+    $description = '';
+
+    $cmd = $this->getFullPathToBinary();
+    if (empty($cmd)) {
+      $description .= t('<strong>Command not found</strong>');
+    }
+
+    return $description;
+  }
+
+  public function getFullPathToBinary() {
+    if ($this->getManualExecutablePath()) {
+      return $this->findExecutablePath($this->getManualExecutablePath());
+    }
+    elseif ($this->findExecutablePath()) {
+      return $this->findExecutablePath();
     }
   }
 

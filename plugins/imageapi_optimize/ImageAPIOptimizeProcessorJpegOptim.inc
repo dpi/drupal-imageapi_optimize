@@ -44,15 +44,8 @@ class ImageAPIOptimizeProcessorJpegOptim extends ImageAPIOptimizeProcessorBinary
     return $this->quality;
   }
 
-
-
   protected function executableName() {
     return 'jpegoptim';
-  }
-
-
-  public function getDescription() {
-    return '';
   }
 
   public function configForm() {
@@ -94,12 +87,7 @@ class ImageAPIOptimizeProcessorJpegOptim extends ImageAPIOptimizeProcessorBinary
   }
 
   public function process($image, $destination) {
-    if ($this->getManualExecutablePath()) {
-      $cmd = $this->getManualExecutablePath();
-    }
-    elseif ($this->findExecutablePath()) {
-      $cmd = $this->findExecutablePath();
-    }
+    $cmd = $this->getFullPathToBinary();
 
     if (empty($cmd)) {
       return FALSE;

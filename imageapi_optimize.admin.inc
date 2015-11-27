@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Menu callback; Listing of all current image styles.
+ * Menu callback; Listing of all current image pipelines.
  */
 function imageapi_optimize_pipeline_list() {
   $page = array();
@@ -19,20 +19,20 @@ function imageapi_optimize_pipeline_list() {
 }
 
 /**
- * Form builder; Edit an image style name and effects order.
+ * Form builder; Edit an image pipeline name and effects order.
  *
  * @param $form_state
  *   An associative array containing the current state of the form.
  * @param $pipeline
- *   An image style array.
+ *   An image pipeline array.
  * @ingroup forms
- * @see image_style_form_submit()
+ * @see image_pipeline_form_submit()
  */
 function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
   $title = t('Edit %name pipeline', array('%name' => $pipeline['label']));
   drupal_set_title($title, PASS_THROUGH);
 
-  // Adjust this form for styles that must be overridden to edit.
+  // Adjust this form for pipelines that must be overridden to edit.
   $editable = (bool) ($pipeline['storage'] & IMAGEAPI_OPTIMIZE_STORAGE_EDITABLE);
 
   if (!$editable && empty($form_state['input'])) {
@@ -43,7 +43,7 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
   $form['#tree'] = TRUE;
   $form['#attached']['css'][drupal_get_path('module', 'image') . '/image.admin.css'] = array();
 
-  // Show the Image Style label.
+  // Show the Image Pipeline label.
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Imageapi optimize pipeline name'),
@@ -52,8 +52,8 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
     '#required' => TRUE,
   );
 
-  // Allow the name of the style to be changed, unless this style is
-  // provided by a module's hook_default_image_styles().
+  // Allow the name of the pipeline to be changed, unless this pipeline is
+  // provided by a module's hook_default_image_pipelines().
   $form['name'] = array(
     '#type' => 'machine_name',
     '#size' => '64',
@@ -65,11 +65,11 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
       'exists' => 'imageapi_optimize_pipeline_load',
       'source' => array('label'),
       'replace_pattern' => '[^0-9a-z_\-]',
-      'error' => t('Please only use lowercase alphanumeric characters, underscores (_), and hyphens (-) for style names.'),
+      'error' => t('Please only use lowercase alphanumeric characters, underscores (_), and hyphens (-) for pipeline names.'),
     ),
   );
 
-  // Build the list of existing image effects for this image style.
+  // Build the list of existing image effects for this image pipeline.
   $form['processors'] = array(
     '#theme' => 'imageapi_optimize_pipeline_processors',
   );
@@ -90,8 +90,8 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
       '#access' => $editable,
     );
 
-    // Only attempt to display these fields for editable styles as the 'ieid'
-    // key is not set for styles defined in code.
+    // Only attempt to display these fields for editable pipelines as the 'ieid'
+    // key is not set for pipelines defined in code.
     if ($editable) {
       $form['processors'][$key]['configure'] = array(
         '#type' => 'link',
@@ -138,7 +138,7 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
     '#submit' => array('imageapi_optimize_pipeline_form_submit', 'imageapi_optimize_pipeline_form_add_submit'),
   );
 
-  // Show the Override or Submit button for this style.
+  // Show the Override or Submit button for this pipeline.
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['override'] = array(
     '#type' => 'submit',
@@ -157,7 +157,7 @@ function imageapi_optimize_pipeline_form($form, &$form_state, $pipeline) {
 }
 
 /**
- * Validate handler for adding a new image effect to an image style.
+ * Validate handler for adding a new image effect to an image pipeline.
  */
 function imageapi_optimize_pipeline_form_add_validate($form, &$form_state) {
   if (!$form_state['values']['new']) {
@@ -166,7 +166,7 @@ function imageapi_optimize_pipeline_form_add_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for adding a new image effect to an image style.
+ * Submit handler for adding a new image effect to an image pipeline.
  */
 function imageapi_optimize_pipeline_form_add_submit($form, &$form_state) {
   $pipeline = $form_state['pipeline'];
@@ -188,7 +188,7 @@ function imageapi_optimize_pipeline_form_add_submit($form, &$form_state) {
 }
 
 /**
- * Submit handler for overriding a module-defined style.
+ * Submit handler for overriding a module-defined pipeline.
  */
 function imageapi_optimize_pipeline_form_override_submit($form, &$form_state) {
   drupal_set_message(t('The %pipeline pipeline has been overridden, allowing you to change its settings.', array('%pipeline' => $form_state['pipeline']['label'])));
@@ -196,10 +196,10 @@ function imageapi_optimize_pipeline_form_override_submit($form, &$form_state) {
 }
 
 /**
- * Submit handler for saving an image style.
+ * Submit handler for saving an image pipeline.
  */
 function imageapi_optimize_pipeline_form_submit($form, &$form_state) {
-  // Update the image style.
+  // Update the image pipeline.
   $pipeline = $form_state['pipeline'];
   $pipeline['name'] = $form_state['values']['name'];
   $pipeline['label'] = $form_state['values']['label'];
@@ -223,10 +223,10 @@ function imageapi_optimize_pipeline_form_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; Form for adding a new image style.
+ * Form builder; Form for adding a new image pipeline.
  *
  * @ingroup forms
- * @see image_style_add_form_submit()
+ * @see image_pipeline_add_form_submit()
  */
 function imageapi_optimize_pipeline_add_form($form, &$form_state) {
   $form['label'] = array(
@@ -244,7 +244,7 @@ function imageapi_optimize_pipeline_add_form($form, &$form_state) {
       'exists' => 'imageapi_optimize_pipeline_load',
       'source' => array('label'),
       'replace_pattern' => '[^0-9a-z_\-]',
-      'error' => t('Please only use lowercase alphanumeric characters, underscores (_), and hyphens (-) for style names.'),
+      'error' => t('Please only use lowercase alphanumeric characters, underscores (_), and hyphens (-) for pipeline names.'),
     ),
   );
 
@@ -257,22 +257,22 @@ function imageapi_optimize_pipeline_add_form($form, &$form_state) {
 }
 
 /**
- * Submit handler for adding a new image style.
+ * Submit handler for adding a new image pipeline.
  */
 function imageapi_optimize_pipeline_add_form_submit($form, &$form_state) {
-  $style = array(
+  $pipeline = array(
     'name' => $form_state['values']['name'],
     'label' => $form_state['values']['label'],
   );
-  $style = imageapi_optimize_pipeline_save($style);
-  drupal_set_message(t('Pipeline %name was created.', array('%name' => $style['label'])));
-  $form_state['redirect'] = 'admin/config/media/imageapi-optimize/edit/' . $style['name'];
+  $pipeline = imageapi_optimize_pipeline_save($pipeline);
+  drupal_set_message(t('Pipeline %name was created.', array('%name' => $pipeline['label'])));
+  $form_state['redirect'] = 'admin/config/media/imageapi-optimize/edit/' . $pipeline['name'];
 }
 
 /**
- * Element validate function to ensure unique, URL safe style names.
+ * Element validate function to ensure unique, URL safe pipeline names.
  *
- * This function is no longer used in Drupal core since image style names are
+ * This function is no longer used in Drupal core since image pipeline names are
  * now validated using #machine_name functionality. It is kept for backwards
  * compatibility (since non-core modules may be using it) and will be removed
  * in Drupal 8.
@@ -284,20 +284,20 @@ function imageapi_optimize_pipeline_name_validate($element, $form_state) {
     form_set_error($element['#name'], t('The imageapi optimize pipeline name %name is already in use.', array('%name' => $element['#value'])));
   }
 
-  // Check for illegal characters in image style names.
+  // Check for illegal characters in image pipeline names.
   if (preg_match('/[^0-9a-z_\-]/', $element['#value'])) {
     form_set_error($element['#name'], t('Please only use lowercase alphanumeric characters, underscores (_), and hyphens (-) for pipeline names.'));
   }
 }
 
 /**
- * Form builder; Form for deleting an image style.
+ * Form builder; Form for deleting an image pipeline.
  *
  * @param $pipeline
- *   An image style array.
+ *   An image pipeline array.
  *
  * @ingroup forms
- * @see image_style_delete_form_submit()
+ * @see image_pipeline_delete_form_submit()
  */
 function imageapi_optimize_pipeline_delete_form($form, &$form_state, $pipeline) {
   $form_state['pipeline'] = $pipeline;
@@ -320,7 +320,7 @@ function imageapi_optimize_pipeline_delete_form($form, &$form_state, $pipeline) 
 }
 
 /**
- * Submit handler to delete an image style.
+ * Submit handler to delete an image pipeline.
  */
 function imageapi_optimize_pipeline_delete_form_submit($form, &$form_state) {
   $pipeline = $form_state['pipeline'];
@@ -331,7 +331,7 @@ function imageapi_optimize_pipeline_delete_form_submit($form, &$form_state) {
 }
 
 /**
- * Confirmation form to revert a database style to its default.
+ * Confirmation form to revert a database pipeline to its default.
  */
 function imageapi_optimize_pipeline_revert_form($form, &$form_state, $pipeline) {
   $form_state['pipeline'] = $pipeline;
@@ -346,7 +346,7 @@ function imageapi_optimize_pipeline_revert_form($form, &$form_state, $pipeline) 
 }
 
 /**
- * Submit handler to convert an overridden style to its default.
+ * Submit handler to convert an overridden pipeline to its default.
  */
 function imageapi_optimize_pipeline_revert_form_submit($form, &$form_state) {
   drupal_set_message(t('The %pipeline pipeline has been reverted to its defaults.', array('%pipeline' => $form_state['pipeline']['label'])));
@@ -364,7 +364,7 @@ function imageapi_optimize_pipeline_revert_form_submit($form, &$form_state) {
  * @param $form_state
  *   An associative array containing the current state of the form.
  * @param $pipeline
- *   An image style array.
+ *   An image pipeline array.
  * @param $processor
  *   An image effect array.
  *
@@ -390,7 +390,7 @@ function imageapi_optimize_processor_form($form, &$form_state, $pipeline, $proce
   $form_state['processor'] = $processor;
   $processor_handler = imageapi_optimize_processor_handler($processor);
 
-  // If no configuration for this image effect, return to the image style page.
+  // If no configuration for this image effect, return to the image pipeline page.
   if (!is_a($processor_handler, 'ImageAPIOptimizeProcessorConfigurableInterface')) {
     drupal_goto('admin/config/media/imageapi-optimize/edit/' . $pipeline['name']);
   }
@@ -435,7 +435,7 @@ function imageapi_optimize_processor_form_submit($form, &$form_state) {
  * Form builder; Form for deleting an image effect.
  *
  * @param $pipeline
- *   Name of the image style from which the image effect will be removed.
+ *   Name of the image pipeline from which the image effect will be removed.
  * @param $processor
  *   Name of the image effect to remove.
  * @ingroup forms
@@ -462,13 +462,13 @@ function imageapi_optimize_processor_delete_form_submit($form, &$form_state) {
 }
 
 /**
- * Returns HTML for the page containing the list of image styles.
+ * Returns HTML for the page containing the list of image pipelines.
  *
  * @param $variables
  *   An associative array containing:
- *   - styles: An array of all the image styles returned by image_get_styles().
+ *   - pipelines: An array of all the image pipelines returned by image_get_pipelines().
  *
- * @see image_get_styles()
+ * @see image_get_pipelines()
  * @ingroup themeable
  */
 function theme_imageapi_optimize_pipeline_list($variables) {
@@ -513,7 +513,7 @@ function theme_imageapi_optimize_pipeline_list($variables) {
 }
 
 /**
- * Returns HTML for a listing of the effects within a specific image style.
+ * Returns HTML for a listing of the effects within a specific image pipeline.
  *
  * @param $variables
  *   An associative array containing:
@@ -531,7 +531,7 @@ function theme_imageapi_optimize_pipeline_processors($variables) {
     $form[$key]['weight']['#attributes']['class'] = array('image-effect-order-weight');
     if (is_numeric($key)) {
       $summary = drupal_render($form[$key]['summary']);
-      $row[] = drupal_render($form[$key]['label']) . (empty($summary) ? '' : ' ' . $summary);
+      $row[] = drupal_render($form[$key]['label']) . (empty($summary) ? '' : ' - ' . $summary);
       $row[] = drupal_render($form[$key]['weight']);
       $row[] = drupal_render($form[$key]['configure']);
       $row[] = drupal_render($form[$key]['remove']);

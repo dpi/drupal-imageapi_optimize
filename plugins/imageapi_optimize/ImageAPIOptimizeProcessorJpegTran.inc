@@ -26,11 +26,6 @@ class ImageAPIOptimizeProcessorJpegTran extends ImageAPIOptimizeProcessorBinary 
     return 'jpegtran';
   }
 
-
-  public function getDescription() {
-    return '';
-  }
-
   public function configForm() {
 
     $form = parent::configForm();
@@ -45,12 +40,7 @@ class ImageAPIOptimizeProcessorJpegTran extends ImageAPIOptimizeProcessorBinary 
   }
 
   public function process($image, $destination) {
-    if ($this->getManualExecutablePath()) {
-      $cmd = $this->getManualExecutablePath();
-    }
-    elseif ($this->findExecutablePath()) {
-      $cmd = $this->findExecutablePath();
-    }
+    $cmd = $this->getFullPathToBinary();
 
     if (empty($cmd)) {
       return FALSE;

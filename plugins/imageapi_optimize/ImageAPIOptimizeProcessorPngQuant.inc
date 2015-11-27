@@ -6,18 +6,8 @@ class ImageAPIOptimizeProcessorPngQuant extends ImageAPIOptimizeProcessorBinary 
     return 'pngquant';
   }
 
-
-  public function getDescription() {
-    return '';
-  }
-
   public function process($image, $destination) {
-    if ($this->getManualExecutablePath()) {
-      $cmd = $this->getManualExecutablePath();
-    }
-    elseif ($this->findExecutablePath()) {
-      $cmd = $this->findExecutablePath();
-    }
+    $cmd = $this->getFullPathToBinary();
 
     if (empty($cmd)) {
       return FALSE;

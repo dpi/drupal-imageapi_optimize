@@ -1,33 +1,33 @@
 <?php
 /**
  * @file
- * Image optimize functionalities
+ * Image optimize functionality.
  */
 
 include_once dirname(__FILE__) . '/imageapi_optimize.features.inc';
 
 /**
- * Image style constant for user presets in the database.
+ * Image pipeline constant for user presets in the database.
  */
 define('IMAGEAPI_OPTIMIZE_STORAGE_NORMAL', 1);
 
 /**
- * Image style constant for user presets that override module-defined presets.
+ * Image pipeline constant for user presets that override module-defined presets.
  */
 define('IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE', 2);
 
 /**
- * Image style constant for module-defined presets in code.
+ * Image pipeline constant for module-defined presets in code.
  */
 define('IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT', 4);
 
 /**
- * Image style constant to represent an editable preset.
+ * Image pipeline constant to represent an editable preset.
  */
 define('IMAGEAPI_OPTIMIZE_STORAGE_EDITABLE', IMAGEAPI_OPTIMIZE_STORAGE_NORMAL | IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE);
 
 /**
- * Image style constant to represent any module-based preset.
+ * Image pipeline constant to represent any module-based preset.
  */
 define('IMAGEAPI_OPTIMIZE_STORAGE_MODULE', IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE | IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT);
 
@@ -80,7 +80,7 @@ function imageapi_optimize_menu() {
     'file' => 'imageapi_optimize.admin.inc',
   );
   $items['admin/config/media/imageapi-optimize/revert/%imageapi_optimize_pipeline'] = array(
-    'title' => 'Revert style',
+    'title' => 'Revert pipeline',
     'description' => 'Revert an imageapi optimize pipeline.',
     'load arguments' => array(NULL, (string) IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE),
     'page callback' => 'drupal_get_form',
@@ -147,11 +147,11 @@ function imageapi_optimize_permission() {
 }
 
 /**
- * Gets an array of all styles and their settings.
+ * Gets an array of all pipelines and their settings.
  *
  * @return
- *   An array of styles keyed by the image style ID (isid).
- * @see image_style_load()
+ *   An array of pipelines keyed by the image pipeline ID (isid).
+ * @see image_pipeline_load()
  */
 function imageapi_optimize_pipelines() {
   $pipelines = &drupal_static(__FUNCTION__);
@@ -164,7 +164,7 @@ function imageapi_optimize_pipelines() {
     else {
       $pipelines = array();
 
-      // Select the module-defined styles.
+      // Select the module-defined pipelines.
       foreach (module_implements('imageapi_optimize_default_pipelines') as $module) {
         $module_pipelines = module_invoke($module, 'imageapi_optimize_default_pipelines');
         foreach ($module_pipelines as $pipeline_name => $pipeline) {
@@ -181,14 +181,14 @@ function imageapi_optimize_pipelines() {
         }
       }
 
-      // Select all the user-defined styles.
+      // Select all the user-defined pipelines.
       $user_pipelines = db_select('imageapi_optimize_pipelines', NULL, array('fetch' => PDO::FETCH_ASSOC))
         ->fields('imageapi_optimize_pipelines')
         ->orderBy('name')
         ->execute()
         ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
 
-      // Allow the user styles to override the module styles.
+      // Allow the user pipelines to override the module pipelines.
       foreach ($user_pipelines as $pipeline_name => $pipeline) {
         $pipeline['module'] = NULL;
         $pipeline['storage'] = IMAGEAPI_OPTIMIZE_STORAGE_NORMAL;
@@ -209,25 +209,25 @@ function imageapi_optimize_pipelines() {
 }
 
 /**
- * Loads a style by style name or ID.
+ * Loads a pipeline by pipeline name or ID.
  *
  * May be used as a loader for menu items.
  *
  * @param $name
- *   The name of the style.
+ *   The name of the pipeline.
  * @param $isid
- *   Optional. The numeric id of a style if the name is not known.
+ *   Optional. The numeric id of a pipeline if the name is not known.
  * @param $include
- *   If set, this loader will restrict to a specific type of image style, may be
- *   one of the defined Image style storage constants.
+ *   If set, this loader will restrict to a specific type of image pipeline, may be
+ *   one of the defined Image pipeline storage constants.
  *
  * @return
- *   An image style array containing the following keys:
- *   - "isid": The unique image style ID.
- *   - "name": The unique image style name.
- *   - "effects": An array of image effects within this image style.
- *   If the image style name or ID is not valid, an empty array is returned.
- * @see image_effect_load()
+ *   An image pipeline array containing the following keys:
+ *   - "isid": The unique image pipeline ID.
+ *   - "name": The unique image pipeline name.
+ *   - "processors": An array of image processors within this image pipeline.
+ *   If the image pipeline name or ID is not valid, an empty array is returned.
+ * @see image_processor_load()
  */
 function imageapi_optimize_pipeline_load($name = NULL, $isid = NULL, $include = NULL) {
   $pipelines = imageapi_optimize_pipelines();
@@ -237,11 +237,11 @@ function imageapi_optimize_pipeline_load($name = NULL, $isid = NULL, $include = 
     $pipeline = $pipelines[$name];
   }
 
-  // If retrieving by image style id.
+  // If retrieving by image pipeline id.
   if (!isset($name) && isset($isid)) {
-    foreach ($pipelines as $name => $database_style) {
-      if (isset($database_style['isid']) && $database_style['isid'] == $isid) {
-        $pipeline = $database_style;
+    foreach ($pipelines as $name => $database_pipeline) {
+      if (isset($database_pipeline['isid']) && $database_pipeline['isid'] == $isid) {
+        $pipeline = $database_pipeline;
         break;
       }
     }
@@ -253,29 +253,29 @@ function imageapi_optimize_pipeline_load($name = NULL, $isid = NULL, $include = 
     return $pipeline;
   }
 
-  // Otherwise the style was not found.
+  // Otherwise the pipeline was not found.
   return FALSE;
 }
 
 /**
- * Saves an image style.
+ * Saves an image pipeline.
  *
  * @param array $pipeline
- *   An image style array containing:
- *   - name: A unique name for the style.
- *   - isid: (optional) An image style ID.
+ *   An image pipeline array containing:
+ *   - name: A unique name for the pipeline.
+ *   - isid: (optional) An image pipeline ID.
  *
  * @return array
- *   An image style array containing:
- *   - name: An unique name for the style.
- *   - old_name: The original name for the style.
- *   - isid: An image style ID.
- *   - is_new: TRUE if this is a new style, and FALSE if it is an existing
- *     style.
+ *   An image pipeline array containing:
+ *   - name: An unique name for the pipeline.
+ *   - old_name: The original name for the pipeline.
+ *   - isid: An image pipeline ID.
+ *   - is_new: TRUE if this is a new pipeline, and FALSE if it is an existing
+ *     pipeline.
  */
 function imageapi_optimize_pipeline_save($pipeline) {
   if (isset($pipeline['isid']) && is_numeric($pipeline['isid'])) {
-    // Load the existing style to make sure we account for renamed styles.
+    // Load the existing pipeline to make sure we account for renamed pipelines.
     $old_pipeline = imageapi_optimize_pipeline_load(NULL, $pipeline['isid']);
     imageapi_optimize_pipeline_flush($old_pipeline);
     drupal_write_record('imageapi_optimize_pipelines', $pipeline, 'isid');
@@ -302,13 +302,13 @@ function imageapi_optimize_pipeline_save($pipeline) {
 }
 
 /**
- * Deletes an image style.
+ * Deletes an image pipeline.
  *
  * @param $pipeline
- *   An image style array.
+ *   An image pipeline array.
  * @param $replacement_pipeline_name
- *   (optional) When deleting a style, specify a replacement style name so
- *   that existing settings (if any) may be converted to a new style.
+ *   (optional) When deleting a pipeline, specify a replacement pipeline name so
+ *   that existing settings (if any) may be converted to a new pipeline.
  *
  * @return
  *   TRUE on success.
@@ -328,17 +328,17 @@ function imageapi_optimize_pipeline_delete($pipeline, $replacement_pipeline_name
 }
 
 /**
- * Loads all the effects for an image style.
+ * Loads all the processors for an image pipeline.
  *
  * @param array $pipeline
- *   An image style array containing:
- *   - isid: The unique image style ID that contains this image effect.
+ *   An image pipeline array containing:
+ *   - isid: The unique image pipeline ID that contains this image processor.
  *
  * @return array
- *   An array of image effects associated with specified image style in the
- *   format array('isid' => array()), or an empty array if the specified style
- *   has no effects.
- * @see image_effects()
+ *   An array of image processors associated with specified image pipeline in the
+ *   format array('isid' => array()), or an empty array if the specified pipeline
+ *   has no processors.
+ * @see image_processors()
  */
 function imageapi_optimize_pipeline_processors($pipeline) {
   $processors = imageapi_optimize_processors();
@@ -353,7 +353,7 @@ function imageapi_optimize_pipeline_processors($pipeline) {
 }
 
 /**
- * Gets an array of image styles suitable for using as select list options.
+ * Gets an array of image pipelines suitable for using as select list options.
  *
  * @param $include_empty
  *   If TRUE a <none> option will be inserted in the options array.
@@ -367,7 +367,7 @@ function imageapi_optimize_pipeline_processors($pipeline) {
  *   the output (the form API sanitizes select list options by default).
  *
  * @return
- *   Array of image styles with the machine name as key and the label as value.
+ *   Array of image pipelines with the machine name as key and the label as value.
  */
 function imageapi_optimize_pipeline_options($include_empty = TRUE, $output = CHECK_PLAIN) {
   $pipelines = imageapi_optimize_pipelines();
@@ -386,22 +386,22 @@ function imageapi_optimize_pipeline_options($include_empty = TRUE, $output = CHE
 }
 
 /**
- * Flushes cached media for a style.
+ * Flushes cached media for a pipeline.
  *
  * @param $pipeline
- *   An image style array.
+ *   An image pipeline array.
  */
 function imageapi_optimize_pipeline_flush($pipeline) {
   // Let other modules update as necessary on flush.
   module_invoke_all('imageapi_optimize_pipeline_flush', $pipeline);
 
-  // Clear image style and effect caches.
+  // Clear image pipeline and processor caches.
   cache_clear_all('imageapi_optimize_pipelines', 'cache');
   cache_clear_all('imageapi_optimize_processors:', 'cache', TRUE);
   drupal_static_reset('imageapi_optimize_pipelines');
   drupal_static_reset('imageapi_optimize_processors');
 
-  // Flush all the image styles using this pipeline.
+  // Flush all the image pipelines using this pipeline.
   $styles = image_styles();
   foreach ($styles as $style) {
     foreach ($style['effects'] as $effect) {
@@ -413,14 +413,14 @@ function imageapi_optimize_pipeline_flush($pipeline) {
 }
 
 /**
- * Saves a default image style to the database.
+ * Saves a default image pipeline to the database.
  *
  * @param pipeline
- *   An image style array provided by a module.
+ *   An image pipeline array provided by a module.
  *
  * @return
- *   An image style array. The returned style array will include the new 'isid'
- *   assigned to the style.
+ *   An image pipeline array. The returned pipeline array will include the new 'isid'
+ *   assigned to the pipeline.
  */
 function imageapi_optimize_default_pipeline_save($pipeline) {
   $pipeline = imageapi_optimize_pipeline_save($pipeline);
@@ -435,10 +435,10 @@ function imageapi_optimize_default_pipeline_save($pipeline) {
 }
 
 /**
- * Reverts the changes made by users to a default image style.
+ * Reverts the changes made by users to a default image pipeline.
  *
  * @param pipeline
- *   An image style array.
+ *   An image pipeline array.
  * @return
  *   Boolean TRUE if the operation succeeded.
  */
@@ -452,20 +452,20 @@ function imageapi_optimize_default_pipeline_revert($pipeline) {
 }
 
 /**
- * Returns a set of image effects.
+ * Returns a set of image processors.
  *
- * These image effects are exposed by modules implementing
- * hook_image_effect_info().
+ * These image processors are exposed by modules implementing
+ * hook_image_processor_info().
  *
  * @return
- *   An array of image effects to be used when transforming images.
- * @see hook_image_effect_info()
- * @see image_effect_definition_load()
+ *   An array of image processors to be used when transforming images.
+ * @see hook_image_processor_info()
+ * @see image_processor_definition_load()
  */
 function imageapi_optimize_processor_definitions() {
   global $language;
 
-  // hook_image_effect_info() includes translated strings, so each language is
+  // hook_image_processor_info() includes translated strings, so each language is
   // cached separately.
   $langcode = $language->language;
 
@@ -479,14 +479,14 @@ function imageapi_optimize_processor_definitions() {
       $processors = array();
       foreach (module_implements('imageapi_optimize_processor_info') as $module) {
         foreach (module_invoke($module, 'imageapi_optimize_processor_info') as $name => $processor) {
-          // Ensure the current toolkit supports the effect.
+          // Ensure the current toolkit supports the processor.
           $processor['module'] = $module;
           $processor['name'] = $name;
           $processor['data'] = isset($processor['data']) ? $processor['data'] : array();
           $processors[$name] = $processor;
         }
       }
-      uasort($processors, '_image_effect_definitions_sort');
+      uasort($processors, '_imageapi_optimize_processor_definitions_sort');
       drupal_alter('imageapi_optimize_processor_info', $processors);
       cache_set("imageapi_optimize_processors:$langcode", $processors);
     }
@@ -496,38 +496,38 @@ function imageapi_optimize_processor_definitions() {
 }
 
 /**
- * Loads the definition for an image effect.
+ * Loads the definition for an image processor.
  *
- * The effect definition is a set of core properties for an image effect, not
+ * The processor definition is a set of core properties for an image processor, not
  * containing any user-settings. The definition defines various functions to
- * call when configuring or executing an image effect. This loader is mostly for
- * internal use within image.module. Use image_effect_load() or
- * image_style_load() to get image effects that contain configuration.
+ * call when configuring or executing an image processor. This loader is mostly for
+ * internal use within image.module. Use image_processor_load() or
+ * image_pipeline_load() to get image processors that contain configuration.
  *
  * @param $processor
- *   The name of the effect definition to load.
- * @param $style
- *   An image style array to which this effect will be added.
+ *   The name of the processor definition to load.
+ * @param $pipeline
+ *   An image pipeline array to which this processor will be added.
  *
  * @return
- *   An array containing the image effect definition with the following keys:
- *   - "effect": The unique name for the effect being performed. Usually prefixed
- *     with the name of the module providing the effect.
- *   - "module": The module providing the effect.
- *   - "help": A description of the effect.
- *   - "function": The name of the function that will execute the effect.
- *   - "form": (optional) The name of a function to configure the effect.
+ *   An array containing the image processor definition with the following keys:
+ *   - "processor": The unique name for the processor being performed. Usually prefixed
+ *     with the name of the module providing the processor.
+ *   - "module": The module providing the processor.
+ *   - "help": A description of the processor.
+ *   - "function": The name of the function that will execute the processor.
+ *   - "form": (optional) The name of a function to configure the processor.
  *   - "summary": (optional) The name of a theme function that will display a
- *     one-line summary of the effect. Does not include the "theme_" prefix.
+ *     one-line summary of the processor. Does not include the "theme_" prefix.
  */
 function imageapi_optimize_processor_definition_load($processor, $pipeline_name = NULL) {
   $definitions = imageapi_optimize_processor_definitions();
 
-  // If a style is specified, do not allow loading of default style
-  // effects.
+  // If a pipeline is specified, do not allow loading of default pipeline
+  // processors.
   if (isset($pipeline_name)) {
-    $style = image_style_load($pipeline_name, NULL);
-    if ($style['storage'] == IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT) {
+    $pipeline = image_pipeline_load($pipeline_name, NULL);
+    if ($pipeline['storage'] == IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT) {
       return FALSE;
     }
   }
@@ -536,11 +536,11 @@ function imageapi_optimize_processor_definition_load($processor, $pipeline_name 
 }
 
 /**
- * Loads all image effects from the database.
+ * Loads all image processors from the database.
  *
  * @return
- *   An array of all image effects.
- * @see image_effect_load()
+ *   An array of all image processors.
+ * @see image_processor_load()
  */
 function imageapi_optimize_processors() {
   $processors = &drupal_static(__FUNCTION__);
@@ -548,7 +548,7 @@ function imageapi_optimize_processors() {
   if (!isset($processors)) {
     $processors = array();
 
-    // Add database image effects.
+    // Add database image processors.
     $result = db_select('imageapi_optimize_processors', NULL, array('fetch' => PDO::FETCH_ASSOC))
       ->fields('imageapi_optimize_processors')
       ->orderBy('imageapi_optimize_processors.weight', 'ASC')
@@ -556,7 +556,7 @@ function imageapi_optimize_processors() {
     foreach ($result as $processor) {
       $processor['data'] = unserialize($processor['data']);
       $definition = imageapi_optimize_processor_definition_load($processor['name']);
-      // Do not load image effects whose definition cannot be found.
+      // Do not load image processors whose definition cannot be found.
       if ($definition) {
         $processor = array_merge($definition, $processor);
         $processors[$processor['ieid']] = $processor;
@@ -568,28 +568,28 @@ function imageapi_optimize_processors() {
 }
 
 /**
- * Loads a single image effect.
+ * Loads a single image processor.
  *
  * @param $ieid
- *   The image effect ID.
+ *   The image processor ID.
  * @param $pipeline_name
- *   The image style name.
+ *   The image pipeline name.
  * @param $include
- *   If set, this loader will restrict to a specific type of image style, may be
- *   one of the defined Image style storage constants.
+ *   If set, this loader will restrict to a specific type of image pipeline, may be
+ *   one of the defined Image pipeline storage constants.
  *
  * @return
- *   An image effect array, consisting of the following keys:
- *   - "ieid": The unique image effect ID.
- *   - "isid": The unique image style ID that contains this image effect.
- *   - "weight": The weight of this image effect within the image style.
- *   - "name": The name of the effect definition that powers this image effect.
- *   - "data": An array of configuration options for this image effect.
+ *   An image processor array, consisting of the following keys:
+ *   - "ieid": The unique image processor ID.
+ *   - "isid": The unique image pipeline ID that contains this image processor.
+ *   - "weight": The weight of this image processor within the image pipeline.
+ *   - "name": The name of the processor definition that powers this image processor.
+ *   - "data": An array of configuration options for this image processor.
  *   Besides these keys, the entirety of the image definition is merged into
- *   the image effect array. Returns FALSE if the specified effect cannot be
+ *   the image processor array. Returns FALSE if the specified processor cannot be
  *   found.
- * @see image_style_load()
- * @see image_effect_definition_load()
+ * @see image_pipeline_load()
+ * @see image_processor_definition_load()
  */
 function imageapi_optimize_processor_load($ieid, $pipeline_name, $include = NULL) {
   if (($pipeline = imageapi_optimize_pipeline_load($pipeline_name, NULL, $include)) && isset($pipeline['processors'][$ieid])) {
@@ -599,13 +599,13 @@ function imageapi_optimize_processor_load($ieid, $pipeline_name, $include = NULL
 }
 
 /**
- * Saves an image effect.
+ * Saves an image processor.
  *
  * @param $processor
- *   An image effect array.
+ *   An image processor array.
  *
  * @return
- *   An image effect array. In the case of a new effect, 'ieid' will be set.
+ *   An image processor array. In the case of a new processor, 'ieid' will be set.
  */
 function imageapi_optimize_processor_save($processor) {
   if (!empty($processor['ieid'])) {
@@ -620,10 +620,10 @@ function imageapi_optimize_processor_save($processor) {
 }
 
 /**
- * Deletes an image effect.
+ * Deletes an image processor.
  *
  * @param $processor
- *   An image effect array.
+ *   An image processor array.
  */
 function imageapi_optimize_processor_delete($processor) {
   db_delete('imageapi_optimize_processors')->condition('ieid', $processor['ieid'])->execute();
@@ -632,9 +632,9 @@ function imageapi_optimize_processor_delete($processor) {
 }
 
 /**
- * Internal function for sorting image effect definitions through uasort().
+ * Internal function for sorting image processor definitions through uasort().
  *
- * @see image_effect_definitions()
+ * @see imageapi_optimize_processor_definitions()
  */
 function _imageapi_optimize_processor_definitions_sort($a, $b) {
   return strcasecmp($a['name'], $b['name']);
@@ -651,19 +651,16 @@ function imageapi_optimize_hook_info() {
   $hooks = array();
 
   $group = 'imageapi_optimize';
-  $hooks['imageapi_optimize_info'] = array(
-    'group' => $group,
-  );
-
-  $hooks['imageapi_optimize_processors'] = array(
-    'group' => $group,
-  );
 
   $hooks['imageapi_optimize_processor_info'] = array(
     'group' => $group,
   );
 
   $hooks['imageapi_optimize_default_pipelines'] = array(
+    'group' => $group,
+  );
+
+  $hooks['imageapi_optimize_default_pipelines_alter'] = array(
     'group' => $group,
   );
 
@@ -678,7 +675,7 @@ function imageapi_optimize_hook_info() {
  * Implements image_HOOK_save().
  */
 function image_imageapi_optimize_save(stdClass $image, $destination) {
-  // This property is set by imageapi_optimize_optimize_effect().
+  // This property is set by imageapi_optimize_optimize_processor().
   if (isset($image->imageapi_optimize_original_toolkit) && isset($image->imageapi_optimize_pipeline) && $image->toolkit != $image->imageapi_optimize_original_toolkit) {
 
     // Cleanup our $image object.
@@ -742,7 +739,6 @@ function imageapi_optimize_image_effect_info() {
     'help' => t('This will optmize the image using the selected options, this should be the last effect in the preset'),
     'effect callback' => 'imageapi_optimize_optimize_effect',
     'form callback' => 'imageapi_optimize_optimize_effect_form',
-    //'summary theme' => 'imageapi_optimize_optimize_effect_summary',
   );
 
   return $effects;
@@ -752,7 +748,7 @@ function imageapi_optimize_image_effect_info() {
  * Image effect callback for image optimize.
  *
  * We actually just change the image toolkit to 'imageapi_optimize' so that
- * when image_toolkit_invoke() is called by image_style_create_derivative()
+ * when image_toolkit_invoke() is called by image_pipeline_create_derivative()
  * our function image_imageapi_optimize_save() is called.
  */
 function imageapi_optimize_optimize_effect(stdClass $image, $options) {
@@ -763,6 +759,11 @@ function imageapi_optimize_optimize_effect(stdClass $image, $options) {
   }
 }
 
+/**
+ * Image effect form for the ImageAPI Optimize effect.
+ * @param $data
+ * @return array
+ */
 function imageapi_optimize_optimize_effect_form($data) {
   $form = array();
 
@@ -841,6 +842,7 @@ function imageapi_optimize_form_image_style_validate($form, &$form_state) {
  */
 function imageapi_optimize_processor_handler(array $processor) {
   $handler_class = $processor['handler'];
+  // @TODO: If no closs is found, fallback to a 'broken' handler.
   $handler = new $handler_class($processor['data']);
   return $handler;
 }

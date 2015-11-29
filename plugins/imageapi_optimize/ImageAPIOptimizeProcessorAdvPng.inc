@@ -36,11 +36,6 @@ class ImageAPIOptimizeProcessorAdvPng extends ImageAPIOptimizeProcessorBinary im
     return 'advpng';
   }
 
-
-  public function getDescription() {
-    return '';
-  }
-
   public function configForm() {
 
     $form = parent::configForm();

@@ -15,6 +15,94 @@ function imageapi_optimize_uninstall() {
 }
 
 /**
+ * Implements hook_schema().
+ */
+function imageapi_optimize_schema() {
+  $schema = array();
+
+  $schema['imageapi_optimize_pipelines'] = array(
+    'description' => 'Stores configuration options for imageapi_optimize pipelines.',
+    'fields' => array(
+      'isid' => array(
+        'description' => 'The primary identifier for an imageapi_optimize pipeline.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'The pipeline machine name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The pipeline administrative name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('isid'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  $schema['imageapi_optimize_processors'] = array(
+    'description' => 'Stores configuration options for imageapi_optimize processors.',
+    'fields' => array(
+      'ieid' => array(
+        'description' => 'The primary identifier for an imageapi_optimize processor.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'isid' => array(
+        'description' => 'The {imageapi_optimize_pipelines}.isid for an imageapi_optimize pipeline.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'weight' => array(
+        'description' => 'The weight of the processor in the pipeline.',
+        'type' => 'int',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => 'The unique name of the processor to be executed.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'The configuration data for the processor.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('ieid'),
+    'indexes' => array(
+      'isid' => array('isid'),
+      'weight' => array('weight'),
+    ),
+    'foreign keys' => array(
+      'imageapi_optimize_pipelines' => array(
+        'table' => 'imageapi_optimize_pipelines',
+        'columns' => array('isid' => 'isid'),
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
  * Upgrade variables.
  */
 function imageapi_optimize_update_7000() {
@@ -45,5 +133,109 @@ function imageapi_optimize_update_7001() {
   $var = variable_get('imageapi_optimize_service');
   if ($var == 'smushit') {
     variable_set('imageapi_optimize_service', 'resmushit');
+  }
+}
+
+/**
+ * Add the new tables for imageapi optimize settings.
+ */
+function imageapi_optimize_update_7100() {
+  $schema = array();
+
+  $schema['imageapi_optimize_pipelines'] = array(
+    'description' => 'Stores configuration options for imageapi_optimize pipelines.',
+    'fields' => array(
+      'isid' => array(
+        'description' => 'The primary identifier for an imageapi_optimize pipeline.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'The pipeline machine name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The pipeline administrative name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('isid'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  $schema['imageapi_optimize_processors'] = array(
+    'description' => 'Stores configuration options for imageapi_optimize processors.',
+    'fields' => array(
+      'ieid' => array(
+        'description' => 'The primary identifier for an imageapi_optimize processor.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'isid' => array(
+        'description' => 'The {imageapi_optimize_pipelines}.isid for an imageapi_optimize pipeline.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'weight' => array(
+        'description' => 'The weight of the processor in the pipeline.',
+        'type' => 'int',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => 'The unique name of the processor to be executed.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'The configuration data for the processor.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('ieid'),
+    'indexes' => array(
+      'isid' => array('isid'),
+      'weight' => array('weight'),
+    ),
+    'foreign keys' => array(
+      'imageapi_optimize_pipelines' => array(
+        'table' => 'imageapi_optimize_pipelines',
+        'columns' => array('isid' => 'isid'),
+      ),
+    ),
+  );
+
+  foreach ($schema as $name => $table) {
+    db_create_table($name, $table);
+  }
+}
+
+/**
+ * Remove all imageapi optimize variables.
+ */
+function imageapi_optimize_update_7101() {
+  if (variable_get('imageapi_optimize_toolkit')) {
+    variable_set('image_toolkit', variable_get('imageapi_optimize_toolkit', 'gd'));
+  }
+  foreach ($GLOBALS['conf'] as $name => $value) {
+    if (strpos($name, 'imageapi_optimize_') === 0) {
+      variable_del($name);
+    }
   }
 }

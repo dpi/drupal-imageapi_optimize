@@ -1,3 +1,21 @@
 name = ImageAPI Optimize
 description = An optimized version Image Toolkits
 core = 7.x
+
+configure = admin/config/media/imageapi-optimize
+
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorInterface.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorConfigurableInterface.inc
+
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorBinary.inc
+
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorReSmushIt.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorAdvDef.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorAdvPng.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJfifRemove.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJpegOptim.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorJpegTran.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorOptiPng.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorPngCrush.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorPngOut.inc
+files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorPngQuant.inc

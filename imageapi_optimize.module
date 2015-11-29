@@ -1,34 +1,92 @@
 <?php
 /**
  * @file
- * Image optimize functionalities
+ * Image optimize functionality.
  */
+
+include_once dirname(__FILE__) . '/imageapi_optimize.features.inc';
 
 /**
- * Implements hook_hook_info().
+ * Image pipeline constant for user presets in the database.
  */
-function imageapi_optimize_hook_info() {
-  $hooks = array();
-
-  $hooks['imageapi_optimize_info'] = array(
-    'group' => 'imageapi_optimize',
-  );
-
-  return $hooks;
-}
+define('IMAGEAPI_OPTIMIZE_STORAGE_NORMAL', 1);
 
 /**
- * Implements hook_theme().
+ * Image pipeline constant for user presets that override module-defined presets.
  */
-function imageapi_optimize_theme() {
-  $items = array();
+define('IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE', 2);
 
-  $items['imageapi_optimize_services_internal_form'] = array(
-    'render element' => 'form',
-    'file' => 'services/internal.inc',
-  );
+/**
+ * Image pipeline constant for module-defined presets in code.
+ */
+define('IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT', 4);
 
-  return $items;
+/**
+ * Image pipeline constant to represent an editable preset.
+ */
+define('IMAGEAPI_OPTIMIZE_STORAGE_EDITABLE', IMAGEAPI_OPTIMIZE_STORAGE_NORMAL | IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE);
+
+/**
+ * Image pipeline constant to represent any module-based preset.
+ */
+define('IMAGEAPI_OPTIMIZE_STORAGE_MODULE', IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE | IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT);
+
+/**
+ * Implements hook_help().
+ */
+function imageapi_optimize_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#imageapi_optimize':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The ImageAPI Optimize module allows you to optimize images on your website. It allows you to configure <em>ImageAPI Optimize pipelines</em> that can be used for optimizing images, and provides an <em>Image effect</em> that can be used in image styles.') . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Optimizing images') . '</dt>';
+      $output .= '<dd>' . t('With the ImageAPI Optimize module you can use either local executables or remote services for optimizting images. These services are executed in a <a href="@imageapi_optimize">pipeline</a>. Once you have a defined pipeline configured then you can add an effect to an <a href="@image">image style</a> so that all images generated with that style use the pipeline at the end for optimization.', array('@imageapi_optimize' => url('admin/config/media/imageapi-optimize'), '@image' => url('admin/config/media/image-styles'))). '<dd>';
+      $output .= '</dl>';
+      return $output;
+    case 'admin/config/media/imageapi-optimize':
+      return '<p>' . t('ImageAPI Optimize pipelines can use local executable programs or remote services for optimizing images. Once you have configured a pipeline you may want to add the ImageAPI Optimize effect to an <a href="">image style</a> to use that pipeline.', array('@imageapi_optimize' => url('admin/config/media/imageapi-optimize'), '@image' => url('admin/config/media/image-styles'))) . '</p>';
+    case 'admin/config/media/imageapi-optimize/edit/%/add/%':
+      $processor = imageapi_optimize_processor_definition_load($arg[7]);
+      if (isset($processor['help']) || !empty($processor['url'])) {
+        if (!empty($processor['url'])) {
+          $text = l(isset($processor['help']) ? $processor['help'] : $processor['url'], $processor['url'], array(
+            'external' => TRUE,
+            'attributes' => array(
+              'target' => '_blank',
+            ),
+          ));
+        }
+        else {
+          $text = isset($processor['help']) ? $processor['help'] : $processor['url'];
+        }
+        return '<p>' . $text . '</p>';
+      }
+      else {
+        return NULL;
+      }
+    case 'admin/config/media/imageapi-optimize/edit/%/processors/%':
+      $processor = ($arg[5] == 'add') ? imageapi_optimize_processor_definition_load($arg[6]) : imageapi_optimize_processor_load($arg[7], $arg[5]);
+      if (isset($processor['help']) || !empty($processor['url'])) {
+        if (!empty($processor['url'])) {
+          $text = l(isset($processor['help']) ? $processor['help'] : $processor['url'], $processor['url'], array(
+            'external' => TRUE,
+            'attributes' => array(
+              'target' => '_blank',
+            ),
+          ));
+        }
+        else {
+          $text = isset($processor['help']) ? $processor['help'] : $processor['url'];
+        }
+        return '<p>' . $text . '</p>';
+      }
+      else {
+        return NULL;
+      }
+  }
 }
 
 /**
@@ -37,163 +95,696 @@ function imageapi_optimize_theme() {
 function imageapi_optimize_menu() {
 
   $items['admin/config/media/imageapi-optimize'] = array(
-    'title' => 'ImageAPI Optimize',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('imageapi_optimize_settings'),
-    'access arguments' => array('administer site configuration'),
+    'title' => 'Imageapi optimize',
+    'description' => 'Configure pipelines that can be used for optimizing images on display.',
+    'page callback' => 'imageapi_optimize_pipeline_list',
+    'access arguments' => array('administer imageapi optimize'),
     'file' => 'imageapi_optimize.admin.inc',
   );
-
-  $items['admin/config/media/imageapi-optimize/%'] = array(
-    'title callback' => 'imageapi_optimize_internal_binary_settings_title',
-    'title arguments' => array(4),
+  $items['admin/config/media/imageapi-optimize/list'] = array(
+    'title' => 'List',
+    'description' => 'List the current imageapi optimize pipelines on the site.',
+    'page callback' => 'imageapi_optimize_pipeline_list',
+    'access arguments' => array('administer imageapi optimize'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+  $items['admin/config/media/imageapi-optimize/add'] = array(
+    'title' => 'Add pipeline',
+    'description' => 'Add a new imageapi optmize pipeline.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('imageapi_optimize_internal_binary_settings', 4),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'services/internal.inc',
+    'page arguments' => array('imageapi_optimize_pipeline_add_form'),
+    'access arguments' => array('administer imageapi optimize'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => 2,
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+  $items['admin/config/media/imageapi-optimize/edit/%imageapi_optimize_pipeline'] = array(
+    'title' => 'Edit pipeline',
+    'description' => 'Configure an imageapi optimize pipeline.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_pipeline_form', 5),
+    'access arguments' => array('administer imageapi optimize'),
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+  $items['admin/config/media/imageapi-optimize/delete/%imageapi_optimize_pipeline'] = array(
+    'title' => 'Delete pipeline',
+    'description' => 'Delete an imageapi optimize pipeline.',
+    'load arguments' => array(NULL, (string) IMAGEAPI_OPTIMIZE_STORAGE_NORMAL),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_pipeline_delete_form', 5),
+    'access arguments' => array('administer imageapi optimize'),
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+  $items['admin/config/media/imageapi-optimize/revert/%imageapi_optimize_pipeline'] = array(
+    'title' => 'Revert pipeline',
+    'description' => 'Revert an imageapi optimize pipeline.',
+    'load arguments' => array(NULL, (string) IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_pipeline_revert_form', 5),
+    'access arguments' => array('administer imageapi optimize'),
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+  $items['admin/config/media/imageapi-optimize/edit/%imageapi_optimize_pipeline/processors/%imageapi_optimize_processor'] = array(
+    'title' => 'Edit imageapi optimize processor',
+    'description' => 'Edit an existing processor within a pipeline.',
+    'load arguments' => array(5, (string) IMAGEAPI_OPTIMIZE_STORAGE_EDITABLE),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_processor_form', 5, 7),
+    'access arguments' => array('administer imageapi optimize'),
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+  $items['admin/config/media/imageapi-optimize/edit/%imageapi_optimize_pipeline/processors/%imageapi_optimize_processor/delete'] = array(
+    'title' => 'Delete imageapi optimize processor',
+    'description' => 'Delete an existing processor from a pipeline.',
+    'load arguments' => array(5, (string) IMAGEAPI_OPTIMIZE_STORAGE_EDITABLE),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_processor_delete_form', 5, 7),
+    'access arguments' => array('administer imageapi optimize'),
+    'file' => 'imageapi_optimize.admin.inc',
+  );
+  $items['admin/config/media/imageapi-optimize/edit/%imageapi_optimize_pipeline/add/%imageapi_optimize_processor_definition'] = array(
+    'title' => 'Add imageapi optimize procesor',
+    'description' => 'Add a new processor to a pipeline.',
+    'load arguments' => array(5),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imageapi_optimize_processor_form', 5, 7),
+    'access arguments' => array('administer imageapi optimize'),
+    'file' => 'imageapi_optimize.admin.inc',
   );
 
   return $items;
 }
 
 /**
- * Implements hook_image_toolkits().
+ * Implements hook_theme().
  */
-function imageapi_optimize_image_toolkits() {
+function imageapi_optimize_theme() {
   return array(
-    'imageapi_optimize' => array(
-      'title' => t('ImageAPI Optimize'),
-      'available' => FALSE,
+    // Theme functions in image.admin.inc.
+    'imageapi_optimize_pipeline_list' => array(
+      'variables' => array('pipelines' => NULL),
+    ),
+    'imageapi_optimize_pipeline_processors' => array(
+      'render element' => 'form',
     ),
   );
 }
 
 /**
- * Implements image_HOOK_save().
+ * Implements hook_permission().
  */
-function image_imageapi_optimize_save(stdClass $image, $dst) {
-  if (_imageapi_optimize_invoke('save', $image, array($dst))) {
-    $return = _imageapi_optimize_optimize($image, $dst);
-  }
-  else {
-    $return = FALSE;
-  }
-
-  // Remove our magic.
-  $image->toolkit = $toolkit = isset($image->original_toolkit) ? $image->original_toolkit : variable_get('imageapi_optimize_toolkit', '');
-  unset($image->original_toolkit);
-
-  return $return;
+function imageapi_optimize_permission() {
+  return array(
+    'administer imageapi optimize' => array(
+      'title' => t('Administer imageapi optimize'),
+      'description' => t('Create and modify pipelines for generating image optimizations.'),
+    ),
+  );
 }
 
 /**
- * Helper. Based on image_toolkit_invoke().
+ * Gets an array of all pipelines and their settings.
  *
- * @see imageapi_optimize_optimize_effect
+ * @return
+ *   An array of pipelines keyed by the image pipeline ID (isid).
+ * @see image_pipeline_load()
  */
-function _imageapi_optimize_invoke($method, $image, array $params = array()) {
-  $toolkit = isset($image->original_toolkit) ? $image->original_toolkit : variable_get('imageapi_optimize_toolkit', '');
-  $function = 'image_' . $toolkit . '_' . $method;
-  if (function_exists($function)) {
-    array_unshift($params, $image);
-    return call_user_func_array($function, $params);
+function imageapi_optimize_pipelines() {
+  $pipelines = &drupal_static(__FUNCTION__);
+
+  // Grab from cache or build the array.
+  if (!isset($pipelines)) {
+    if ($cache = cache_get('imageapi_optimize_pipelines', 'cache')) {
+      $pipelines = $cache->data;
+    }
+    else {
+      $pipelines = array();
+
+      // Select the module-defined pipelines.
+      foreach (module_implements('imageapi_optimize_default_pipelines') as $module) {
+        $module_pipelines = module_invoke($module, 'imageapi_optimize_default_pipelines');
+        foreach ($module_pipelines as $pipeline_name => $pipeline) {
+          $pipeline['name'] = $pipeline_name;
+          $pipeline['label'] = empty($pipeline['label']) ? $pipeline_name : $pipeline['label'];
+          $pipeline['module'] = $module;
+          $pipeline['storage'] = IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT;
+          foreach ($pipeline['processors'] as $key => $processor) {
+            $definition = imageapi_optimize_processor_definition_load($processor['name']);
+            $processor = array_merge($definition, $processor);
+            $pipeline['processors'][$key] = $processor;
+          }
+          $pipelines[$pipeline_name] = $pipeline;
+        }
+      }
+
+      // Select all the user-defined pipelines.
+      $user_pipelines = db_select('imageapi_optimize_pipelines', NULL, array('fetch' => PDO::FETCH_ASSOC))
+        ->fields('imageapi_optimize_pipelines')
+        ->orderBy('name')
+        ->execute()
+        ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+
+      // Allow the user pipelines to override the module pipelines.
+      foreach ($user_pipelines as $pipeline_name => $pipeline) {
+        $pipeline['module'] = NULL;
+        $pipeline['storage'] = IMAGEAPI_OPTIMIZE_STORAGE_NORMAL;
+        $pipeline['processors'] = imageapi_optimize_pipeline_processors($pipeline);
+        if (isset($pipelines[$pipeline_name]['module'])) {
+          $pipeline['module'] = $pipelines[$pipeline_name]['module'];
+          $pipeline['storage'] = IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE;
+        }
+        $pipelines[$pipeline_name] = $pipeline;
+      }
+
+      drupal_alter('imageapi_optimize_pipelines', $pipelines);
+      cache_set('imageapi_optimize_pipelines', $pipelines);
+    }
+  }
+
+  return $pipelines;
+}
+
+/**
+ * Loads a pipeline by pipeline name or ID.
+ *
+ * May be used as a loader for menu items.
+ *
+ * @param $name
+ *   The name of the pipeline.
+ * @param $isid
+ *   Optional. The numeric id of a pipeline if the name is not known.
+ * @param $include
+ *   If set, this loader will restrict to a specific type of image pipeline, may be
+ *   one of the defined Image pipeline storage constants.
+ *
+ * @return
+ *   An image pipeline array containing the following keys:
+ *   - "isid": The unique image pipeline ID.
+ *   - "name": The unique image pipeline name.
+ *   - "processors": An array of image processors within this image pipeline.
+ *   If the image pipeline name or ID is not valid, an empty array is returned.
+ * @see image_processor_load()
+ */
+function imageapi_optimize_pipeline_load($name = NULL, $isid = NULL, $include = NULL) {
+  $pipelines = imageapi_optimize_pipelines();
+
+  // If retrieving by name.
+  if (isset($name) && isset($pipelines[$name])) {
+    $pipeline = $pipelines[$name];
+  }
+
+  // If retrieving by image pipeline id.
+  if (!isset($name) && isset($isid)) {
+    foreach ($pipelines as $name => $database_pipeline) {
+      if (isset($database_pipeline['isid']) && $database_pipeline['isid'] == $isid) {
+        $pipeline = $database_pipeline;
+        break;
+      }
+    }
+  }
+
+  // Restrict to the specific type of flag. This bitwise operation basically
+  // states "if the storage is X, then allow".
+  if (isset($pipeline) && (!isset($include) || ($pipeline['storage'] & (int) $include))) {
+    return $pipeline;
+  }
+
+  // Otherwise the pipeline was not found.
+  return FALSE;
+}
+
+/**
+ * Saves an image pipeline.
+ *
+ * @param array $pipeline
+ *   An image pipeline array containing:
+ *   - name: A unique name for the pipeline.
+ *   - isid: (optional) An image pipeline ID.
+ *
+ * @return array
+ *   An image pipeline array containing:
+ *   - name: An unique name for the pipeline.
+ *   - old_name: The original name for the pipeline.
+ *   - isid: An image pipeline ID.
+ *   - is_new: TRUE if this is a new pipeline, and FALSE if it is an existing
+ *     pipeline.
+ */
+function imageapi_optimize_pipeline_save($pipeline) {
+  if (isset($pipeline['isid']) && is_numeric($pipeline['isid'])) {
+    // Load the existing pipeline to make sure we account for renamed pipelines.
+    $old_pipeline = imageapi_optimize_pipeline_load(NULL, $pipeline['isid']);
+    imageapi_optimize_pipeline_flush($old_pipeline);
+    drupal_write_record('imageapi_optimize_pipelines', $pipeline, 'isid');
+    if ($old_pipeline['name'] != $pipeline['name']) {
+      $pipeline['old_name'] = $old_pipeline['name'];
+    }
+  }
+  else {
+    // Add a default label when not given.
+    if (empty($pipeline['label'])) {
+      $pipeline['label'] = $pipeline['name'];
+    }
+    drupal_write_record('imageapi_optimize_pipelines', $pipeline);
+    $pipeline['is_new'] = TRUE;
+  }
+
+  // Let other modules update as necessary on save.
+  module_invoke_all('imageapi_optimize_pipeline_save', $pipeline);
+
+  // Clear all caches and flush.
+  imageapi_optimize_pipeline_flush($pipeline);
+
+  return $pipeline;
+}
+
+/**
+ * Deletes an image pipeline.
+ *
+ * @param $pipeline
+ *   An image pipeline array.
+ * @param $replacement_pipeline_name
+ *   (optional) When deleting a pipeline, specify a replacement pipeline name so
+ *   that existing settings (if any) may be converted to a new pipeline.
+ *
+ * @return
+ *   TRUE on success.
+ */
+function imageapi_optimize_pipeline_delete($pipeline, $replacement_pipeline_name = '') {
+  imageapi_optimize_pipeline_flush($pipeline);
+
+  db_delete('imageapi_optimize_processors')->condition('isid', $pipeline['isid'])->execute();
+  db_delete('imageapi_optimize_pipelines')->condition('isid', $pipeline['isid'])->execute();
+
+  // Let other modules update as necessary on save.
+  $pipeline['old_name'] = $pipeline['name'];
+  $pipeline['name'] = $replacement_pipeline_name;
+  module_invoke_all('imageapi_optimize_pipeline_delete', $pipeline);
+
+  return TRUE;
+}
+
+/**
+ * Loads all the processors for an image pipeline.
+ *
+ * @param array $pipeline
+ *   An image pipeline array containing:
+ *   - isid: The unique image pipeline ID that contains this image processor.
+ *
+ * @return array
+ *   An array of image processors associated with specified image pipeline in the
+ *   format array('isid' => array()), or an empty array if the specified pipeline
+ *   has no processors.
+ * @see image_processors()
+ */
+function imageapi_optimize_pipeline_processors($pipeline) {
+  $processors = imageapi_optimize_processors();
+  $pipeline_processors = array();
+  foreach ($processors as $processor) {
+    if ($pipeline['isid'] == $processor['isid']) {
+      $pipeline_processors[$processor['ieid']] = $processor;
+    }
+  }
+
+  return $pipeline_processors;
+}
+
+/**
+ * Gets an array of image pipelines suitable for using as select list options.
+ *
+ * @param $include_empty
+ *   If TRUE a <none> option will be inserted in the options array.
+ * @param $output
+ *   Optional flag determining how the options will be sanitized on output.
+ *   Leave this at the default (CHECK_PLAIN) if you are using the output of
+ *   this function directly in an HTML context, such as for checkbox or radio
+ *   button labels, and do not plan to sanitize it on your own. If using the
+ *   output of this function as select list options (its primary use case), you
+ *   should instead set this flag to PASS_THROUGH to avoid double-escaping of
+ *   the output (the form API sanitizes select list options by default).
+ *
+ * @return
+ *   Array of image pipelines with the machine name as key and the label as value.
+ */
+function imageapi_optimize_pipeline_options($include_empty = TRUE, $output = CHECK_PLAIN) {
+  $pipelines = imageapi_optimize_pipelines();
+  $options = array();
+  if ($include_empty && !empty($pipelines)) {
+    $options[''] = t('<none>');
+  }
+  foreach ($pipelines as $name => $pipeline) {
+    $options[$name] = ($output == PASS_THROUGH) ? $pipeline['label'] : check_plain($pipeline['label']);
+  }
+
+  if (empty($options)) {
+    $options[''] = t('No defined pipelines');
+  }
+  return $options;
+}
+
+/**
+ * Flushes cached media for a pipeline.
+ *
+ * @param $pipeline
+ *   An image pipeline array.
+ */
+function imageapi_optimize_pipeline_flush($pipeline) {
+  // Let other modules update as necessary on flush.
+  module_invoke_all('imageapi_optimize_pipeline_flush', $pipeline);
+
+  // Clear image pipeline and processor caches.
+  cache_clear_all('imageapi_optimize_pipelines', 'cache');
+  cache_clear_all('imageapi_optimize_processors:', 'cache', TRUE);
+  drupal_static_reset('imageapi_optimize_pipelines');
+  drupal_static_reset('imageapi_optimize_processors');
+
+  // Flush all the image pipelines using this pipeline.
+  $styles = image_styles();
+  foreach ($styles as $style) {
+    foreach ($style['effects'] as $effect) {
+      if (($effect['name'] == 'imageapi_optimize') && isset($effect['data']['pipeline']) && ($effect['data']['pipeline'] == $pipeline['name'])) {
+        image_style_flush($style);
+      }
+    }
+  }
+}
+
+/**
+ * Saves a default image pipeline to the database.
+ *
+ * @param pipeline
+ *   An image pipeline array provided by a module.
+ *
+ * @return
+ *   An image pipeline array. The returned pipeline array will include the new 'isid'
+ *   assigned to the pipeline.
+ */
+function imageapi_optimize_default_pipeline_save($pipeline) {
+  $pipeline = imageapi_optimize_pipeline_save($pipeline);
+  $processors = array();
+  foreach ($pipeline['processors'] as $processor) {
+    $processor['isid'] = $pipeline['isid'];
+    $processor = imageapi_optimize_processor_save($processor);
+    $processors[$processor['ieid']] = $processor;
+  }
+  $pipeline['processors'] = $processors;
+  return $pipeline;
+}
+
+/**
+ * Reverts the changes made by users to a default image pipeline.
+ *
+ * @param pipeline
+ *   An image pipeline array.
+ * @return
+ *   Boolean TRUE if the operation succeeded.
+ */
+function imageapi_optimize_default_pipeline_revert($pipeline) {
+  imageapi_optimize_pipeline_flush($pipeline);
+
+  db_delete('imageapi_optimize_processors')->condition('isid', $pipeline['isid'])->execute();
+  db_delete('imageapi_optimize_pipelines')->condition('isid', $pipeline['isid'])->execute();
+
+  return TRUE;
+}
+
+/**
+ * Returns a set of image processors.
+ *
+ * These image processors are exposed by modules implementing
+ * hook_image_processor_info().
+ *
+ * @return
+ *   An array of image processors to be used when transforming images.
+ * @see hook_image_processor_info()
+ * @see image_processor_definition_load()
+ */
+function imageapi_optimize_processor_definitions() {
+  global $language;
+
+  // hook_image_processor_info() includes translated strings, so each language is
+  // cached separately.
+  $langcode = $language->language;
+
+  $processors = &drupal_static(__FUNCTION__);
+
+  if (!isset($processors)) {
+    if ($cache = cache_get("imageapi_optimize_processors:$langcode")) {
+      $processors = $cache->data;
+    }
+    else {
+      $processors = array();
+      foreach (module_implements('imageapi_optimize_processor_info') as $module) {
+        foreach (module_invoke($module, 'imageapi_optimize_processor_info') as $name => $processor) {
+          // Ensure the current toolkit supports the processor.
+          $processor['module'] = $module;
+          $processor['name'] = $name;
+          $processor['data'] = isset($processor['data']) ? $processor['data'] : array();
+          $processors[$name] = $processor;
+        }
+      }
+      uasort($processors, '_imageapi_optimize_processor_definitions_sort');
+      drupal_alter('imageapi_optimize_processor_info', $processors);
+      cache_set("imageapi_optimize_processors:$langcode", $processors);
+    }
+  }
+
+  return $processors;
+}
+
+/**
+ * Loads the definition for an image processor.
+ *
+ * The processor definition is a set of core properties for an image processor, not
+ * containing any user-settings. The definition defines various functions to
+ * call when configuring or executing an image processor. This loader is mostly for
+ * internal use within image.module. Use image_processor_load() or
+ * image_pipeline_load() to get image processors that contain configuration.
+ *
+ * @param $processor
+ *   The name of the processor definition to load.
+ * @param $pipeline
+ *   An image pipeline array to which this processor will be added.
+ *
+ * @return
+ *   An array containing the image processor definition with the following keys:
+ *   - "processor": The unique name for the processor being performed. Usually prefixed
+ *     with the name of the module providing the processor.
+ *   - "module": The module providing the processor.
+ *   - "help": A description of the processor.
+ *   - "function": The name of the function that will execute the processor.
+ *   - "form": (optional) The name of a function to configure the processor.
+ *   - "summary": (optional) The name of a theme function that will display a
+ *     one-line summary of the processor. Does not include the "theme_" prefix.
+ */
+function imageapi_optimize_processor_definition_load($processor, $pipeline_name = NULL) {
+  $definitions = imageapi_optimize_processor_definitions();
+
+  // If a pipeline is specified, do not allow loading of default pipeline
+  // processors.
+  if (isset($pipeline_name)) {
+    $pipeline = imageapi_optimize_pipeline_load($pipeline_name, NULL);
+    if ($pipeline['storage'] == IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT) {
+      return FALSE;
+    }
+  }
+
+  return isset($definitions[$processor]) ? $definitions[$processor] : FALSE;
+}
+
+/**
+ * Loads all image processors from the database.
+ *
+ * @return
+ *   An array of all image processors.
+ * @see image_processor_load()
+ */
+function imageapi_optimize_processors() {
+  $processors = &drupal_static(__FUNCTION__);
+
+  if (!isset($processors)) {
+    $processors = array();
+
+    // Add database image processors.
+    $result = db_select('imageapi_optimize_processors', NULL, array('fetch' => PDO::FETCH_ASSOC))
+      ->fields('imageapi_optimize_processors')
+      ->orderBy('imageapi_optimize_processors.weight', 'ASC')
+      ->execute();
+    foreach ($result as $processor) {
+      $processor['data'] = unserialize($processor['data']);
+      $definition = imageapi_optimize_processor_definition_load($processor['name']);
+      // Do not load image processors whose definition cannot be found.
+      if ($definition) {
+        $processor = array_merge($definition, $processor);
+        $processors[$processor['ieid']] = $processor;
+      }
+    }
+  }
+
+  return $processors;
+}
+
+/**
+ * Loads a single image processor.
+ *
+ * @param $ieid
+ *   The image processor ID.
+ * @param $pipeline_name
+ *   The image pipeline name.
+ * @param $include
+ *   If set, this loader will restrict to a specific type of image pipeline, may be
+ *   one of the defined Image pipeline storage constants.
+ *
+ * @return
+ *   An image processor array, consisting of the following keys:
+ *   - "ieid": The unique image processor ID.
+ *   - "isid": The unique image pipeline ID that contains this image processor.
+ *   - "weight": The weight of this image processor within the image pipeline.
+ *   - "name": The name of the processor definition that powers this image processor.
+ *   - "data": An array of configuration options for this image processor.
+ *   Besides these keys, the entirety of the image definition is merged into
+ *   the image processor array. Returns FALSE if the specified processor cannot be
+ *   found.
+ * @see image_pipeline_load()
+ * @see image_processor_definition_load()
+ */
+function imageapi_optimize_processor_load($ieid, $pipeline_name, $include = NULL) {
+  if (($pipeline = imageapi_optimize_pipeline_load($pipeline_name, NULL, $include)) && isset($pipeline['processors'][$ieid])) {
+    return $pipeline['processors'][$ieid];
   }
   return FALSE;
 }
 
 /**
- * Optimizes image with external commands
+ * Saves an image processor.
+ *
+ * @param $processor
+ *   An image processor array.
+ *
+ * @return
+ *   An image processor array. In the case of a new processor, 'ieid' will be set.
  */
-function _imageapi_optimize_optimize($image, $dst) {
-  $info = imageapi_optimize_info();
-  $service = variable_get('imageapi_optimize_service', 'internal');
-
-  if (isset($info['services'][$service])) {
-    $service = $info['services'][$service];
-    if (isset($service['file'])) {
-      include_once $service['file'];
-    }
-
-    $service['callbacks']['process']($image, $dst);
+function imageapi_optimize_processor_save($processor) {
+  if (!empty($processor['ieid'])) {
+    drupal_write_record('imageapi_optimize_processors', $processor, 'ieid');
   }
-
-  // If optimize service fails, there is no problem. Original image is saved.
-  return TRUE;
+  else {
+    drupal_write_record('imageapi_optimize_processors', $processor);
+  }
+  $pipeline = imageapi_optimize_pipeline_load(NULL, $processor['isid']);
+  imageapi_optimize_pipeline_flush($pipeline);
+  return $processor;
 }
 
 /**
- * Load all defined services and binaries info definitions.
+ * Deletes an image processor.
+ *
+ * @param $processor
+ *   An image processor array.
  */
-function imageapi_optimize_info($reset = FALSE) {
-  $cache = cache_get('imageapi_optimize:info');
+function imageapi_optimize_processor_delete($processor) {
+  db_delete('imageapi_optimize_processors')->condition('ieid', $processor['ieid'])->execute();
+  $pipeline = imageapi_optimize_pipeline_load(NULL, $processor['isid']);
+  imageapi_optimize_pipeline_flush($pipeline);
+}
 
-  if (!$cache || $reset) {
-    $info = module_invoke_all('imageapi_optimize_info');
-    drupal_alter('imageapi_optimize_info', $info);
+/**
+ * Internal function for sorting image processor definitions through uasort().
+ *
+ * @see imageapi_optimize_processor_definitions()
+ */
+function _imageapi_optimize_processor_definitions_sort($a, $b) {
+  return strcasecmp($a['name'], $b['name']);
+}
 
-    // Process and validate all defined info.
-    foreach ($info as $type => &$types) {
-      foreach ($types as $name => &$data) {
-        // Set defaults.
-        $data += array(
-          'callbacks' => array(),
-          'weight' => 0,
-        );
-        $data['callbacks'] += array(
-          'process' => 'imageapi_optimize_' . $type . '_' . $name,
-        );
 
-        // Add form callback if undefined yet available.
-        if (!isset($data['callbacks']['form'])) {
-          $function = 'imageapi_optimize_' . $type . '_' . $name . '_form';
-          if (function_exists($function)) {
-            $data['callbacks']['form'] = $function;
-          }
-        }
 
-        // Set user defined binaries weight if available.
-        if ('binaries' == $type) {
-          $settings = variable_get('imageapi_optimize_' . $name, array());
-          $data['weight'] = isset($settings['weight']) ? $settings['weight'] : $data['weight'];
 
-          if (empty($data['settings'])) {
-            $data['settings'] = array();
-          }
-        }
 
-        // Validate info.
-        $error = '';
-        if (!isset($data['title'])) {
-          $error .= t('Title not set.') . '<br />';
-        }
+/**
+ * Implements hook_hook_info().
+ */
+function imageapi_optimize_hook_info() {
+  $hooks = array();
 
-        foreach ($data['callbacks'] as $callback) {
-          if (!function_exists($callback)) {
-            $error .= t('Function !callback doesn\'t exist.', array('!callback' => $callback)) . '<br />';
-          }
-        }
+  $group = 'imageapi_optimize';
 
-        if (isset($data['file']) && !file_exists($data['file'])) {
-          $error .= t('File !file doesn\'t exist.', array('!file' => $data['file'])) . '<br />';
-        }
+  $hooks['imageapi_optimize_processor_info'] = array(
+    'group' => $group,
+  );
 
-        if (!empty($error)) {
-          unset($info[$type][$name]);
-          watchdog('imageapi_optimize', $error);
-        }
-      }
+  $hooks['imageapi_optimize_default_pipelines'] = array(
+    'group' => $group,
+  );
 
-      // Sort by weight.
-      uasort($info[$type], 'drupal_sort_weight');
+  $hooks['imageapi_optimize_default_pipelines_alter'] = array(
+    'group' => $group,
+  );
+
+  $hooks['imageapi_optimize_pipelines_alter'] = array(
+    'group' => $group,
+  );
+
+  return $hooks;
+}
+
+/**
+ * Implements image_HOOK_save().
+ */
+function image_imageapi_optimize_save(stdClass $image, $destination) {
+  // This property is set by imageapi_optimize_optimize_processor().
+  if (isset($image->imageapi_optimize_original_toolkit) && isset($image->imageapi_optimize_pipeline) && $image->toolkit != $image->imageapi_optimize_original_toolkit) {
+
+    // Cleanup our $image object.
+    $original_toolkit = $image->imageapi_optimize_original_toolkit;
+    $pipeline = $image->imageapi_optimize_pipeline;
+    unset($image->imageapi_optimize_original_toolkit);
+    unset($image->imageapi_optimize_pipeline);
+    $image->toolkit = $original_toolkit;
+
+    // Save the image with the original toolkit, and then optimize.
+    if (image_toolkit_invoke('save', $image, array($destination))) {
+      imageapi_optimize_optimize_file($pipeline, $destination, $image);
+      // Failure to optimize means the original image will still be in place.
+      return TRUE;
     }
-
-    // Cache the info to reduce future load times.
-    cache_set('imageapi_optimize:info', $info);
-    return $info;
   }
 
-  return $cache->data;
+  return FALSE;
 }
+
+/**
+ * Optimize an image through a specified pipeline.
+ *
+ * @param $pipeline
+ *   The machine name of the pipeline to optimize the image with.
+ * @param $drupal_filepath
+ *   The path to the image to be optimized.
+ * @param $image
+ *   Optional, the return value from image_load for the $drupal_filepath.
+ *
+ * @return bool
+ *   Return TRUE or FALSE indicating success or failure to optimize the image,
+ *   respectively.
+ */
+function imageapi_optimize_optimize_file($pipeline, $drupal_filepath, $image = NULL) {
+  $return = TRUE;
+
+  if ($pipeline = imageapi_optimize_pipeline_load($pipeline)) {
+    if (is_null($image)) {
+      $image = image_load($drupal_filepath);
+    }
+
+    foreach ($pipeline['processors'] as $processor) {
+      $processor_handler = imageapi_optimize_processor_handler($processor);
+      $return = $return && $processor_handler->process($image, $drupal_filepath);
+    }
+  }
+
+  return $return;
+}
+
 
 /**
  * Implements hook_image_effect_info().
@@ -205,6 +796,7 @@ function imageapi_optimize_image_effect_info() {
     'label' => t('ImageAPI Optimize'),
     'help' => t('This will optmize the image using the selected options, this should be the last effect in the preset'),
     'effect callback' => 'imageapi_optimize_optimize_effect',
+    'form callback' => 'imageapi_optimize_optimize_effect_form',
   );
 
   return $effects;
@@ -214,12 +806,34 @@ function imageapi_optimize_image_effect_info() {
  * Image effect callback for image optimize.
  *
  * We actually just change the image toolkit to 'imageapi_optimize' so that
- * when image_toolkit_invoke() is called by image_style_create_derivative()
+ * when image_toolkit_invoke() is called by image_pipeline_create_derivative()
  * our function image_imageapi_optimize_save() is called.
  */
 function imageapi_optimize_optimize_effect(stdClass $image, $options) {
-  $image->original_toolkit = $image->toolkit;
-  $image->toolkit = 'imageapi_optimize';
+  if (!empty($options['pipeline']) && imageapi_optimize_pipeline_load($options['pipeline'])) {
+    $image->imageapi_optimize_original_toolkit = $image->toolkit;
+    $image->toolkit = 'imageapi_optimize';
+    $image->imageapi_optimize_pipeline = $options['pipeline'];
+  }
+}
+
+/**
+ * Image effect form for the ImageAPI Optimize effect.
+ * @param $data
+ * @return array
+ */
+function imageapi_optimize_optimize_effect_form($data) {
+  $form = array();
+
+  $form['pipeline'] = array(
+    '#type' => 'radios',
+    '#title' => t('Pipeline'),
+    '#required' => TRUE,
+    '#options' => imageapi_optimize_pipeline_options(FALSE, PASS_THROUGH),
+    '#default_value' => isset($data['pipeline']) ? $data['pipeline'] : '',
+  );
+
+  return $form;
 }
 
 /**
@@ -272,5 +886,41 @@ function imageapi_optimize_form_image_style_validate($form, &$form_state) {
 
   if (isset($imageapi_optimize_effects_id) && !empty($weights)) {
     form_set_value($form['effects'][$imageapi_optimize_effects_id]['weight'], max($weights) + 1, $form_state);
+  }
+}
+
+/**
+ * Get the handler class for a given processor.
+ *
+ * @param array $processor
+ *   The processor to get the handler for.
+ *
+ * @return ImageAPIOptimizeProcessorInterface
+ *   An instance of a imageapi optimize handler class.
+ */
+function imageapi_optimize_processor_handler(array $processor) {
+  $handler_class = $processor['handler'];
+  // @TODO: If no closs is found, fallback to a 'broken' handler.
+  $handler = new $handler_class($processor['data']);
+  return $handler;
+}
+
+/**
+ * Form element validation function, ensures that value is an integer.
+ *
+ * @param $element
+ *   The form element being validated.
+ * @param $form_state
+ *   The form state collection of the form element being validated.
+ */
+function imageapi_optimize_processor_integer_validate($element, &$form_state) {
+  $value = empty($element['#allow_negative']) ? $element['#value'] : preg_replace('/^-/', '', $element['#value']);
+  if ($element['#value'] != '' && (!is_numeric($value) || intval($value) <= 0)) {
+    if (empty($element['#allow_negative'])) {
+      form_error($element, t('!name must be an integer.', array('!name' => $element['#title'])));
+    }
+    else {
+      form_error($element, t('!name must be a positive integer.', array('!name' => $element['#title'])));
+    }
   }
 }

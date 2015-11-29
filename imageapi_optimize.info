@@ -2,6 +2,8 @@ name = ImageAPI Optimize
 description = An optimized version Image Toolkits
 core = 7.x
 
+configure = admin/config/media/imageapi-optimize
+
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorInterface.inc
 files[] = plugins/imageapi_optimize/ImageAPIOptimizeProcessorConfigurableInterface.inc
 

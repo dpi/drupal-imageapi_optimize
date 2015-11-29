@@ -32,6 +32,64 @@ define('IMAGEAPI_OPTIMIZE_STORAGE_EDITABLE', IMAGEAPI_OPTIMIZE_STORAGE_NORMAL | 
 define('IMAGEAPI_OPTIMIZE_STORAGE_MODULE', IMAGEAPI_OPTIMIZE_STORAGE_OVERRIDE | IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT);
 
 /**
+ * Implements hook_help().
+ */
+function imageapi_optimize_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#imageapi_optimize':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The ImageAPI Optimize module allows you to optimize images on your website. It allows you to configure <em>ImageAPI Optimize pipelines</em> that can be used for optimizing images, and provides an <em>Image effect</em> that can be used in image styles.') . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Optimizing images') . '</dt>';
+      $output .= '<dd>' . t('With the ImageAPI Optimize module you can use either local executables or remote services for optimizting images. These services are executed in a <a href="@imageapi_optimize">pipeline</a>. Once you have a defined pipeline configured then you can add an effect to an <a href="@image">image style</a> so that all images generated with that style use the pipeline at the end for optimization.', array('@imageapi_optimize' => url('admin/config/media/imageapi-optimize'), '@image' => url('admin/config/media/image-styles'))). '<dd>';
+      $output .= '</dl>';
+      return $output;
+    case 'admin/config/media/imageapi-optimize':
+      return '<p>' . t('ImageAPI Optimize pipelines can use local executable programs or remote services for optimizing images. Once you have configured a pipeline you may want to add the ImageAPI Optimize effect to an <a href="">image style</a> to use that pipeline.', array('@imageapi_optimize' => url('admin/config/media/imageapi-optimize'), '@image' => url('admin/config/media/image-styles'))) . '</p>';
+    case 'admin/config/media/imageapi-optimize/edit/%/add/%':
+      $processor = imageapi_optimize_processor_definition_load($arg[7]);
+      if (isset($processor['help']) || !empty($processor['url'])) {
+        if (!empty($processor['url'])) {
+          $text = l(isset($processor['help']) ? $processor['help'] : $processor['url'], $processor['url'], array(
+            'external' => TRUE,
+            'attributes' => array(
+              'target' => '_blank',
+            ),
+          ));
+        }
+        else {
+          $text = isset($processor['help']) ? $processor['help'] : $processor['url'];
+        }
+        return '<p>' . $text . '</p>';
+      }
+      else {
+        return NULL;
+      }
+    case 'admin/config/media/imageapi-optimize/edit/%/processors/%':
+      $processor = ($arg[5] == 'add') ? imageapi_optimize_processor_definition_load($arg[6]) : imageapi_optimize_processor_load($arg[7], $arg[5]);
+      if (isset($processor['help']) || !empty($processor['url'])) {
+        if (!empty($processor['url'])) {
+          $text = l(isset($processor['help']) ? $processor['help'] : $processor['url'], $processor['url'], array(
+            'external' => TRUE,
+            'attributes' => array(
+              'target' => '_blank',
+            ),
+          ));
+        }
+        else {
+          $text = isset($processor['help']) ? $processor['help'] : $processor['url'];
+        }
+        return '<p>' . $text . '</p>';
+      }
+      else {
+        return NULL;
+      }
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function imageapi_optimize_menu() {

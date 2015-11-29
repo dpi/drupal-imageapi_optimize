@@ -526,7 +526,7 @@ function imageapi_optimize_processor_definition_load($processor, $pipeline_name 
   // If a pipeline is specified, do not allow loading of default pipeline
   // processors.
   if (isset($pipeline_name)) {
-    $pipeline = image_pipeline_load($pipeline_name, NULL);
+    $pipeline = imageapi_optimize_pipeline_load($pipeline_name, NULL);
     if ($pipeline['storage'] == IMAGEAPI_OPTIMIZE_STORAGE_DEFAULT) {
       return FALSE;
     }

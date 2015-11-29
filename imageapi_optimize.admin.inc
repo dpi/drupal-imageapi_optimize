@@ -173,8 +173,10 @@ function imageapi_optimize_pipeline_form_add_submit($form, &$form_state) {
   // Check if this field has any configuration options.
   $processor = imageapi_optimize_processor_definition_load($form_state['values']['new']);
 
+  $processor_handler = imageapi_optimize_processor_handler($processor);
+
   // Load the configuration form for this option.
-  if (isset($processor['form callback'])) {
+  if (is_a($processor_handler, 'ImageAPIOptimizeProcessorConfigurableInterface')) {
     $path = 'admin/config/media/imageapi-optimize/edit/' . $form_state['pipeline']['name'] . '/add/' . $form_state['values']['new'];
     $form_state['redirect'] = array($path, array('query' => array('weight' => $form_state['values']['weight'])));
   }

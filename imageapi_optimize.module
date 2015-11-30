@@ -797,6 +797,7 @@ function imageapi_optimize_image_effect_info() {
     'help' => t('This will optmize the image using the selected options, this should be the last effect in the preset'),
     'effect callback' => 'imageapi_optimize_optimize_effect',
     'form callback' => 'imageapi_optimize_optimize_effect_form',
+    'dimensions passthrough' => TRUE,
   );
 
   return $effects;

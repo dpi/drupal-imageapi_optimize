@@ -32,6 +32,9 @@ function imageapi_optimize_drush_command() {
       'extensions' => array(
         'description' => dt('Comma separated list of file extensions to search for. Default: png,jpg,jpeg'),
       ),
+      'no-backup' => array(
+        'description' => dt('Skip the backup of the original file'),
+      ),
     ),
   );
 
@@ -115,10 +118,20 @@ function drush_imageapi_optimize() {
     return drush_set_error('Operation aborted.');
   }
 
+  $backup = !drush_get_option('no-backup', FALSE);
+
+  if ($backup) {
+    $backup_engine = drush_include_engine('version_control', 'backup');
+    $backup_dir = $backup_engine->prepare_backup_dir('imageapi_optimize');
+  }
+  else {
+    $backup_dir = NULL;
+  }
+
   foreach ($files as $file => $info) {
     $batch['operations'][] = array(
       '_drush_imageapi_optimize_batch_optimize_single',
-      array($file, $pipeline),
+      array($file, $pipeline, $backup_dir),
     );
   }
 
@@ -132,7 +145,16 @@ function drush_imageapi_optimize() {
 /**
  * Batch callback for optimizing a single image.
  */
-function _drush_imageapi_optimize_batch_optimize_single($file, $pipeline_name, &$context) {
+function _drush_imageapi_optimize_batch_optimize_single($file, $pipeline_name, $backup_dir, &$context) {
+  if (isset($backup_dir)) {
+    if (file_unmanaged_copy($file, $backup_dir, FILE_EXISTS_RENAME)) {
+      drush_log(dt('Backed up file: @file to @destination', array('@file' => $file, '@destination' => $backup_dir)));
+    }
+    else {
+      return drush_set_error('Backup of original file failed.');
+    }
+  }
+
   drush_log(dt('Optimizing file: @file', array('@file' => $file)));
   $filesize_before = filesize($file);
   imageapi_optimize_optimize_file($pipeline_name, $file);

@@ -22,6 +22,14 @@ entity.imageapi_optimize_pipeline.delete_form:
   requirements:
     _permission: 'administer imageapi optimize pipelines'
 
+entity.imageapi_optimize_pipeline.flush_form:
+  path: '/admin/config/media/imageapi-optimize-pipelines/manage/{imageapi_optimize_pipeline}/flush'
+  defaults:
+    _entity_form: 'imageapi_optimize_pipeline.flush'
+    _title: 'Flush'
+  requirements:
+    _permission: 'administer imageapi optimize pipelines'
+
 imageapi_optimize.processor_delete:
   path: '/admin/config/media/imageapi-optimize-pipelines/manage/{imageapi_optimize_pipeline}/processors/{imageapi_optimize_processor}/delete'
   defaults:

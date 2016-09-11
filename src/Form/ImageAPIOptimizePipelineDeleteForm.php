@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Creates a form to delete an image style.
  */
-class ImageStyleDeleteForm extends EntityDeleteForm {
+class ImageAPIOptimizePipelineDeleteForm extends EntityDeleteForm {
 
   /**
    * Replacement options.
@@ -21,30 +21,30 @@ class ImageStyleDeleteForm extends EntityDeleteForm {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Optionally select a style before deleting %style', array('%style' => $this->entity->label()));
+    return $this->t('Optionally select a pipeline before deleting %pipeline', array('%pipeline' => $this->entity->label()));
   }
   /**
    * {@inheritdoc}
    */
   public function getDescription() {
     if (count($this->getReplacementOptions()) > 1) {
-      return $this->t('If this style is in use on the site, you may select another style to replace it. All images that have been generated for this style will be permanently deleted. If no replacement style is selected, the dependent configurations might need manual reconfiguration.');
+      return $this->t('If this pipeline is in use on the site, you may select another pipeline to replace it. If no replacement pipeline is selected, the dependent configurations might need manual reconfiguration.');
     }
-    return $this->t('All images that have been generated for this style will be permanently deleted. The dependent configurations might need manual reconfiguration.');
+    return $this->t('The dependent configurations might need manual reconfiguration.');
   }
 
   /**
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
-    $replacement_styles = $this->getReplacementOptions();
+    $replacement_pipelines = $this->getReplacementOptions();
     // If there are non-empty options in the list, allow the user to optionally
     // pick up a replacement.
-    if (count($replacement_styles) > 1) {
+    if (count($replacement_pipelines) > 1) {
       $form['replacement'] = [
         '#type' => 'select',
-        '#title' => $this->t('Replacement style'),
-        '#options' => $replacement_styles,
+        '#title' => $this->t('Replacement pipeline'),
+        '#options' => $replacement_pipelines,
         '#empty_option' => $this->t('- No replacement -'),
         '#weight' => -5,
       ];
@@ -60,7 +60,7 @@ class ImageStyleDeleteForm extends EntityDeleteForm {
     // Save a selected replacement in the image style storage. It will be used
     // later, in the same request, when resolving dependencies.
     if ($replacement = $form_state->getValue('replacement')) {
-      /** @var \Drupal\imageapi_optimize\ImageStyleStorageInterface $storage */
+      /** @var \Drupal\imageapi_optimize\ImageAPIOptimizePipelineStorageInterface $storage */
       $storage = $this->entityTypeManager->getStorage($this->entity->getEntityTypeId());
       $storage->setReplacementId($this->entity->id(), $replacement);
     }
@@ -75,7 +75,7 @@ class ImageStyleDeleteForm extends EntityDeleteForm {
    */
   protected function getReplacementOptions() {
     if (!isset($this->replacementOptions)) {
-      $this->replacementOptions = array_diff_key(image_style_options(), [$this->getEntity()->id() => '']);
+      $this->replacementOptions = array_diff_key(imageapi_optimize_pipeline_options(), [$this->getEntity()->id() => '']);
     }
     return $this->replacementOptions;
   }

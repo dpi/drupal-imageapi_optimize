@@ -10,12 +10,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base form for image style add and edit forms.
  */
-abstract class ImageStyleFormBase extends EntityForm {
+abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
 
   /**
    * The entity being used by this form.
    *
-   * @var \Drupal\imageapi_optimize\ImageStyleInterface
+   * @var \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface
    */
   protected $entity;
 
@@ -29,11 +29,11 @@ abstract class ImageStyleFormBase extends EntityForm {
   /**
    * Constructs a base class for image style add and edit forms.
    *
-   * @param \Drupal\Core\Entity\EntityStorageInterface $image_style_storage
+   * @param \Drupal\Core\Entity\EntityStorageInterface $imageapi_optimize_processor_storage
    *   The image style entity storage.
    */
-  public function __construct(EntityStorageInterface $image_style_storage) {
-    $this->imageStyleStorage = $image_style_storage;
+  public function __construct(EntityStorageInterface $imageapi_optimize_processor_storage) {
+    $this->imageStyleStorage = $imageapi_optimize_processor_storage;
   }
 
   /**

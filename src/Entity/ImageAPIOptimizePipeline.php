@@ -157,36 +157,17 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
   /**
    * {@inheritdoc}
    */
-  // @TODO: change this to our main pipeline apply function.
-  public function createDerivative($original_uri, $derivative_uri) {
-//
-//    // If the source file doesn't exist, return FALSE without creating folders.
-//    $image = \Drupal::service('image.factory')->get($original_uri);
-//    if (!$image->isValid()) {
-//      return FALSE;
-//    }
-//
-//    // Get the folder for the final location of this style.
-//    $directory = drupal_dirname($derivative_uri);
-//
-//    // Build the destination folder tree if it doesn't already exist.
-//    if (!file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-//      \Drupal::logger('image')->error('Failed to create style directory: %directory', array('%directory' => $directory));
-//      return FALSE;
-//    }
-//
-//    foreach ($this->getEffects() as $effect) {
-//      $effect->applyEffect($image);
-//    }
-//
-//    if (!$image->save($derivative_uri)) {
-//      if (file_exists($derivative_uri)) {
-//        \Drupal::logger('image')->error('Cached image file %destination already exists. There may be an issue with your rewrite configuration.', array('%destination' => $derivative_uri));
-//      }
-//      return FALSE;
-//    }
-//
-//    return TRUE;
+  public function applyToImage($image_uri) {
+
+    // If the source file doesn't exist, return FALSE without creating folders.
+    $image = \Drupal::service('image.factory')->get($image_uri);
+    if (!$image->isValid()) {
+      return FALSE;
+    }
+
+    foreach ($this->getProcessors() as $processor) {
+      $processor->applyProcessor($image);
+    }
   }
 
 

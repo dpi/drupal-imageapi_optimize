@@ -1,0 +1,27 @@
+<?php
+
+use Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline;
+
+/**
+ * Gets an array of image pipelines suitable for using as select list options.
+ *
+ * @param $include_empty
+ *   If TRUE a '- None -' option will be inserted in the options array.
+ * @return
+ *   Array of image pipelines both key and value are set to pipeline name.
+ */
+function imageapi_optimize_pipeline_options($include_empty = TRUE) {
+  $pipelines = ImageAPIOptimizePipeline::loadMultiple();
+  $options = array();
+  if ($include_empty && !empty($pipelines)) {
+    $options[''] = t('- None -');
+  }
+  foreach ($pipelines as $name => $pipeline) {
+    $options[$name] = $pipeline->label();
+  }
+
+  if (empty($options)) {
+    $options[''] = t('No defined pipelines');
+  }
+  return $options;
+}

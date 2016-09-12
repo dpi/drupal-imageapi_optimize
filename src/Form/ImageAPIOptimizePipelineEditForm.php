@@ -24,13 +24,13 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
   /**
    * Constructs an ImageAPIOptimizePipelineEditForm object.
    *
-   * @param \Drupal\Core\Entity\EntityStorageInterface $imageapi_optimize_processor_storage
+   * @param \Drupal\Core\Entity\EntityStorageInterface $imageapi_optimize_pipeline_storage
    *   The storage.
    * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager $imageapi_optimize_processor_manager
    *   The image effect manager service.
    */
-  public function __construct(EntityStorageInterface $imageapi_optimize_processor_storage, ImageAPIOptimizeProcessorManager $imageapi_optimize_processor_manager) {
-    parent::__construct($imageapi_optimize_processor_storage);
+  public function __construct(EntityStorageInterface $imageapi_optimize_pipeline_storage, ImageAPIOptimizeProcessorManager $imageapi_optimize_processor_manager) {
+    parent::__construct($imageapi_optimize_pipeline_storage);
     $this->imageAPIOptimizeProcessorManager = $imageapi_optimize_processor_manager;
   }
 
@@ -63,7 +63,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
       '#weight' => -5,
     );
 
-    // Build the list of existing image effects for this image style.
+    // Build the list of existing image processors for this image style.
     $form['processors'] = array(
       '#type' => 'table',
       '#header' => array(
@@ -79,10 +79,10 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
         ),
       ),
       '#attributes' => array(
-        'id' => 'image-style-effects',
+        'id' => 'image-style-processors',
       ),
       '#empty' => t('There are currently no processors in this style. Add one by selecting an option below.'),
-      // Render effects below parent elements.
+      // Render processors below parent elements.
       '#weight' => 5,
     );
     foreach ($this->entity->getProcessors() as $processor) {
@@ -102,7 +102,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
 
       if (!empty($summary)) {
         $summary['#prefix'] = ' ';
-        $form['effects'][$key]['processor']['data']['summary'] = $summary;
+        $form['processors'][$key]['processor']['data']['summary'] = $summary;
       }
 
       $form['processors'][$key]['weight'] = array(
@@ -140,34 +140,34 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
     }
 
     // Build the new image processor addition form and add it to the processor list.
-    $new_effect_options = array();
-    $effects = $this->imageAPIOptimizeProcessorManager->getDefinitions();
-    uasort($effects, function ($a, $b) {
+    $new_processor_options = array();
+    $processors = $this->imageAPIOptimizeProcessorManager->getDefinitions();
+    uasort($processors, function ($a, $b) {
       return strcasecmp($a['id'], $b['id']);
     });
-    foreach ($effects as $processor => $definition) {
-      $new_effect_options[$processor] = $definition['label'];
+    foreach ($processors as $processor => $definition) {
+      $new_processor_options[$processor] = $definition['label'];
     }
-    $form['effects']['new'] = array(
+    $form['processors']['new'] = array(
       '#tree' => FALSE,
       '#weight' => isset($user_input['weight']) ? $user_input['weight'] : NULL,
       '#attributes' => array('class' => array('draggable')),
     );
-    $form['effects']['new']['processor'] = array(
+    $form['processors']['new']['processor'] = array(
       'data' => array(
         'new' => array(
           '#type' => 'select',
-          '#title' => $this->t('Effect'),
+          '#title' => $this->t('Processor'),
           '#title_display' => 'invisible',
-          '#options' => $new_effect_options,
+          '#options' => $new_processor_options,
           '#empty_option' => $this->t('Select a new processor'),
         ),
         array(
           'add' => array(
             '#type' => 'submit',
             '#value' => $this->t('Add'),
-            '#validate' => array('::effectValidate'),
-            '#submit' => array('::submitForm', '::effectSave'),
+            '#validate' => array('::processorValidate'),
+            '#submit' => array('::submitForm', '::processorSave'),
           ),
         ),
       ),
@@ -175,14 +175,14 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
       '#suffix' => '</div>',
     );
 
-    $form['effects']['new']['weight'] = array(
+    $form['processors']['new']['weight'] = array(
       '#type' => 'weight',
       '#title' => $this->t('Weight for new processor'),
       '#title_display' => 'invisible',
       '#default_value' => count($this->entity->getEffects()) + 1,
       '#attributes' => array('class' => array('image-processor-order-weight')),
     );
-    $form['effects']['new']['operations'] = array(
+    $form['processors']['new']['operations'] = array(
       'data' => array(),
     );
 
@@ -192,43 +192,43 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
   /**
    * Validate handler for image effect.
    */
-  public function effectValidate($form, FormStateInterface $form_state) {
+  public function processorValidate($form, FormStateInterface $form_state) {
     if (!$form_state->getValue('new')) {
-      $form_state->setErrorByName('new', $this->t('Select an effect to add.'));
+      $form_state->setErrorByName('new', $this->t('Select a processor to add.'));
     }
   }
 
   /**
    * Submit handler for image effect.
    */
-  public function effectSave($form, FormStateInterface $form_state) {
+  public function processorSave($form, FormStateInterface $form_state) {
     $this->save($form, $form_state);
 
     // Check if this field has any configuration options.
-    $effect = $this->imageAPIOptimizeProcessorManager->getDefinition($form_state->getValue('new'));
+    $processor = $this->imageAPIOptimizeProcessorManager->getDefinition($form_state->getValue('new'));
 
     // Load the configuration form for this option.
-    if (is_subclass_of($effect['class'], '\Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface')) {
+    if (is_subclass_of($processor['class'], '\Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface')) {
       $form_state->setRedirect(
-        'image.effect_add_form',
+        'imageapi_optimize.processor_add_form',
         array(
-          'image_style' => $this->entity->id(),
-          'image_effect' => $form_state->getValue('new'),
+          'imageapi_optimize_pipeline' => $this->entity->id(),
+          'imageapi_optimize_processor' => $form_state->getValue('new'),
         ),
         array('query' => array('weight' => $form_state->getValue('weight')))
       );
     }
-    // If there's no form, immediately add the image effect.
+    // If there's no form, immediately add the image processor.
     else {
-      $effect = array(
-        'id' => $effect['id'],
+      $processor = array(
+        'id' => $processor['id'],
         'data' => array(),
         'weight' => $form_state->getValue('weight'),
       );
-      $effect_id = $this->entity->addImageAPIOptimizeProcessor($effect);
+      $processor_id = $this->entity->addImageAPIOptimizeProcessor($processor);
       $this->entity->save();
-      if (!empty($effect_id)) {
-        drupal_set_message($this->t('The image effect was successfully applied.'));
+      if (!empty($processor_id)) {
+        drupal_set_message($this->t('The imageapi optimize processor was successfully applied.'));
       }
     }
   }
@@ -239,8 +239,8 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     // Update image effect weights.
-    if (!$form_state->isValueEmpty('effects')) {
-      $this->updateEffectWeights($form_state->getValue('effects'));
+    if (!$form_state->isValueEmpty('processors')) {
+      $this->updateProcessorWeights($form_state->getValue('processors'));
     }
 
     parent::submitForm($form, $form_state);
@@ -251,7 +251,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
    */
   public function save(array $form, FormStateInterface $form_state) {
     parent::save($form, $form_state);
-    drupal_set_message($this->t('Changes to the style have been saved.'));
+    drupal_set_message($this->t('Changes to the pipeline have been saved.'));
   }
 
   /**
@@ -259,7 +259,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
    */
   public function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
-    $actions['submit']['#value'] = $this->t('Update style');
+    $actions['submit']['#value'] = $this->t('Update pipeline');
 
     return $actions;
   }
@@ -267,14 +267,14 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
   /**
    * Updates image effect weights.
    *
-   * @param array $effects
+   * @param array $processors
    *   Associative array with effects having effect uuid as keys and array
    *   with effect data as values.
    */
-  protected function updateEffectWeights(array $effects) {
-    foreach ($effects as $uuid => $effect_data) {
-      if ($this->entity->getEffects()->has($uuid)) {
-        $this->entity->getEffect($uuid)->setWeight($effect_data['weight']);
+  protected function updateProcessorWeights(array $processors) {
+    foreach ($processors as $uuid => $processor_data) {
+      if ($this->entity->getProcessors()->has($uuid)) {
+        $this->entity->getProcessor($uuid)->setWeight($processor_data['weight']);
       }
     }
   }

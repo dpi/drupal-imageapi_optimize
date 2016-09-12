@@ -24,16 +24,16 @@ abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $imageStyleStorage;
+  protected $imageapiOptimizePipelineStorage;
 
   /**
    * Constructs a base class for image style add and edit forms.
    *
-   * @param \Drupal\Core\Entity\EntityStorageInterface $imageapi_optimize_processor_storage
+   * @param \Drupal\Core\Entity\EntityStorageInterface $imageapi_optimize_pipeline_storage
    *   The image style entity storage.
    */
-  public function __construct(EntityStorageInterface $imageapi_optimize_processor_storage) {
-    $this->imageStyleStorage = $imageapi_optimize_processor_storage;
+  public function __construct(EntityStorageInterface $imageapi_optimize_pipeline_storage) {
+    $this->imageapiOptimizePipelineStorage = $imageapi_optimize_pipeline_storage;
   }
 
   /**
@@ -41,7 +41,7 @@ abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity.manager')->getStorage('image_style')
+      $container->get('entity.manager')->getStorage('imageapi_optimize_pipeline')
     );
   }
 
@@ -52,14 +52,14 @@ abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
 
     $form['label'] = array(
       '#type' => 'textfield',
-      '#title' => $this->t('Image style name'),
+      '#title' => $this->t('ImageAPI optimize pipeline name'),
       '#default_value' => $this->entity->label(),
       '#required' => TRUE,
     );
     $form['name'] = array(
       '#type' => 'machine_name',
       '#machine_name' => array(
-        'exists' => array($this->imageStyleStorage, 'load'),
+        'exists' => array($this->imageapiOptimizePipelineStorage, 'load'),
       ),
       '#default_value' => $this->entity->id(),
       '#required' => TRUE,

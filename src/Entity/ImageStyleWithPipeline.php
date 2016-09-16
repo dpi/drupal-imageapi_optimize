@@ -6,32 +6,48 @@ use Drupal\image\Entity\ImageStyle;
 
 class ImageStyleWithPipeline extends ImageStyle {
 
-  protected $pipeline;
+  //@TODO: maybe this should be something other than a 'random' string.
+  protected $pipeline = '__default__';
 
   public function createDerivative($original_uri, $derivative_uri) {
     $result = parent::createDerivative($original_uri, $derivative_uri);
+
     if ($result) {
       // Apply the pipeline to the $derivative_uri.
       if ($this->hasPipeline()) {
-        $this->getPipeline()->applyToImage($derivative_uri);
+        $this->getPipelineEntity()->applyToImage($derivative_uri);
       }
     }
+
+    // Always return the result of the parent class processing.
+    return $result;
+  }
+
+  public function getPipeline() {
+    return $this->pipeline;
   }
 
   /**
    * @return \Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline|null
    */
-  public function getPipeline() {
+  public function getPipelineEntity() {
     if (!empty($this->pipeline)) {
       $storage = $this->entityTypeManager()->getStorage('imageapi_optimize_pipeline');
-      if ($pipeline = $storage->load($this->pipeline)) {
+      if ($this->pipeline == '__default__') {
+        // @TODO: get this from some config, or a service.
+        $pipelineId = 'resmushit';
+      }
+      else {
+        $pipelineId = $this->pipeline;
+      }
+      if ($pipeline = $storage->load($pipelineId)) {
         return $pipeline;
       }
     }
   }
 
   public function hasPipeline() {
-    return (bool) $this->getPipeline();
+    return (bool) $this->getPipelineEntity();
   }
 
 

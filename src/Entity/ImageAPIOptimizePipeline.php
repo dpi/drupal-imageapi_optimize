@@ -159,14 +159,14 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
    */
   public function applyToImage($image_uri) {
 
-    // If the source file doesn't exist, return FALSE without creating folders.
+    // If the source file doesn't exist, return FALSE.
     $image = \Drupal::service('image.factory')->get($image_uri);
     if (!$image->isValid()) {
       return FALSE;
     }
 
     foreach ($this->getProcessors() as $processor) {
-      $processor->applyToImage($image);
+      $processor->applyToImage($image_uri);
     }
   }
 

@@ -10,11 +10,14 @@ use Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline;
  * @return
  *   Array of image pipelines both key and value are set to pipeline name.
  */
-function imageapi_optimize_pipeline_options($include_empty = TRUE) {
+function imageapi_optimize_pipeline_options($include_empty = TRUE, $include_site_default = TRUE) {
   $pipelines = ImageAPIOptimizePipeline::loadMultiple();
   $options = array();
   if ($include_empty && !empty($pipelines)) {
     $options[''] = t('- None -');
+  }
+  if ($include_site_default && !empty($pipelines)) {
+    $options['__default__'] = t('Sitewide default pipeline: name');
   }
   foreach ($pipelines as $name => $pipeline) {
     $options[$name] = $pipeline->label();
@@ -49,10 +52,8 @@ function imageapi_optimize_form_image_style_edit_form_alter(&$form, \Drupal\Core
     '#type' => 'select',
     '#title' => t('ImageAPI Optimize Pipeline'),
     '#options' => imageapi_optimize_pipeline_options(),
+    '#default_value' => $entity->getPipeline(),
+    '#description' => t('Optionally select an Image Optimization pipeline which will be applied after all effects in this image style.'),
+    '#weight' => 10,
   ];
-
-  if ($entity->hasPipeline()) {
-    $form['pipeline']['#default_value'] = $entity->getPipeline()->id();
-  }
-
 }

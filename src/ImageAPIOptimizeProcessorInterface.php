@@ -60,4 +60,19 @@ interface ImageAPIOptimizeProcessorInterface extends PluginInspectionInterface, 
    */
   public function setWeight($weight);
 
+  /**
+   * Creates a new image derivative based on this image style.
+   *
+   * Generates an image derivative applying all image effects and saving the
+   * resulting image.
+   *
+   * @param string $image_uri
+   *   Original image file URI.
+   *
+   * @return bool
+   *   TRUE if an image derivative was generated, or FALSE if the image
+   *   derivative could not be generated.
+   */
+  public function applyToImage($image_uri);
+
 }

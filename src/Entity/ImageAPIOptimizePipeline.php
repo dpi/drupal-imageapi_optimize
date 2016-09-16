@@ -166,7 +166,7 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
     }
 
     foreach ($this->getProcessors() as $processor) {
-      $processor->applyProcessor($image);
+      $processor->applyToImage($image);
     }
   }
 

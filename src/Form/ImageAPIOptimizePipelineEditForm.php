@@ -53,15 +53,15 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'imageapi_optimize/admin';
 
-    // Show the thumbnail preview.
-    $preview_arguments = array('#theme' => 'image_style_preview', '#style' => $this->entity);
-    $form['preview'] = array(
-      '#type' => 'item',
-      '#title' => $this->t('Preview'),
-      '#markup' => drupal_render($preview_arguments),
-      // Render preview above parent elements.
-      '#weight' => -5,
-    );
+//    // Show the thumbnail preview.
+//    $preview_arguments = array('#theme' => 'image_style_preview', '#style' => $this->entity);
+//    $form['preview'] = array(
+//      '#type' => 'item',
+//      '#title' => $this->t('Preview'),
+//      '#markup' => drupal_render($preview_arguments),
+//      // Render preview above parent elements.
+//      '#weight' => -5,
+//    );
 
     // Build the list of existing image processors for this image style.
     $form['processors'] = array(
@@ -128,7 +128,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
       }
       $links['delete'] = array(
         'title' => $this->t('Delete'),
-        'url' => Url::fromRoute('imageapi_optimize.processor_delete_form', [
+        'url' => Url::fromRoute('imageapi_optimize.processor_delete', [
           'imageapi_optimize_pipeline' => $this->entity->id(),
           'imageapi_optimize_processor' => $key,
         ]),
@@ -179,7 +179,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
       '#type' => 'weight',
       '#title' => $this->t('Weight for new processor'),
       '#title_display' => 'invisible',
-      '#default_value' => count($this->entity->getEffects()) + 1,
+      '#default_value' => count($this->entity->getProcessors()) + 1,
       '#attributes' => array('class' => array('image-processor-order-weight')),
     );
     $form['processors']['new']['operations'] = array(
@@ -225,7 +225,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
         'data' => array(),
         'weight' => $form_state->getValue('weight'),
       );
-      $processor_id = $this->entity->addImageAPIOptimizeProcessor($processor);
+      $processor_id = $this->entity->addProcessor($processor);
       $this->entity->save();
       if (!empty($processor_id)) {
         drupal_set_message($this->t('The imageapi optimize processor was successfully applied.'));

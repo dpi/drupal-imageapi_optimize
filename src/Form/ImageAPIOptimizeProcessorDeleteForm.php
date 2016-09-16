@@ -58,7 +58,7 @@ class ImageAPIOptimizeProcessorDeleteForm extends ConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, ImageAPIOptimizePipelineInterface $imageapi_optimize_pipeline = NULL, $imageapi_optimize_processor = NULL) {
     $this->imageAPIOptimizePipeline = $imageapi_optimize_pipeline;
-    $this->imageAPIOptimizeProcessor = $this->imageAPIOptimizePipeline->getEffect($imageapi_optimize_processor);
+    $this->imageAPIOptimizeProcessor = $this->imageAPIOptimizePipeline->getProcessor($imageapi_optimize_processor);
 
     return parent::buildForm($form, $form_state);
   }
@@ -67,7 +67,7 @@ class ImageAPIOptimizeProcessorDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->imageAPIOptimizePipeline->deleteImageAPIOptimizeProcessor($this->imageAPIOptimizeProcessor);
+    $this->imageAPIOptimizePipeline->deleteProcessor($this->imageAPIOptimizeProcessor);
     drupal_set_message($this->t('The imageapi optimize processor %name has been deleted.', array('%name' => $this->imageAPIOptimizeProcessor->label())));
     $form_state->setRedirectUrl($this->imageAPIOptimizePipeline->urlInfo('edit-form'));
   }

@@ -119,7 +119,7 @@ abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
 
     $this->imageAPIOptimizeProcessor->setWeight($form_state->getValue('weight'));
     if (!$this->imageAPIOptimizeProcessor->getUuid()) {
-      $this->imageAPIOptimizePipeline->addImageAPIOptimizeProcessor($this->imageAPIOptimizeProcessor->getConfiguration());
+      $this->imageAPIOptimizePipeline->addProcessor($this->imageAPIOptimizeProcessor->getConfiguration());
     }
     $this->imageAPIOptimizePipeline->save();
 

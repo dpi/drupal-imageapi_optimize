@@ -34,8 +34,9 @@ class ImageStyleWithPipeline extends ImageStyle {
     if (!empty($this->pipeline)) {
       $storage = $this->entityTypeManager()->getStorage('imageapi_optimize_pipeline');
       if ($this->pipeline == '__default__') {
-        // @TODO: get this from some config, or a service.
-        $pipelineId = 'resmushit';
+        if ($default_pipeline_name = \Drupal::config('imageapi_optimize.settings')->get('default_pipeline')) {
+          $pipelineId = $default_pipeline_name;
+        }
       }
       else {
         $pipelineId = $this->pipeline;

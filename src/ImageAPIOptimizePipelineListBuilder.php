@@ -52,6 +52,7 @@ class ImageAPIOptimizePipelineListBuilder extends ConfigEntityListBuilder {
     $build['table']['#empty'] = $this->t('There are currently no pipelines. <a href=":url">Add a new one</a>.', [
       ':url' => Url::fromRoute('imageapi_optimize.pipeline_add')->toString(),
     ]);
+    $build['config_form'] = \Drupal::formBuilder()->getForm('Drupal\imageapi_optimize\Form\ImageAPIOptimizeDefaultPipelineConfigForm');
     return $build;
   }
 

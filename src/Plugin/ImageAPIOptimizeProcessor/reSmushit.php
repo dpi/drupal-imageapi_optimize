@@ -6,9 +6,12 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Image\ImageInterface;
 use Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase;
 use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase;
+use GuzzleHttp\ClientInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Desaturates (grayscale) an image resource.
+ * Uses the resmush.it webservice to optimize an image.
  *
  * @ImageAPIOptimizeProcessor(
  *   id = "resmushit",
@@ -18,13 +21,42 @@ use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase;
  */
 class reSmushit extends ConfigurableImageAPIOptimizeProcessorBase {
 
+  /**
+   * The HTTP client to fetch the feed data with.
+   *
+   * @var \GuzzleHttp\ClientInterface
+   */
+  protected $httpClient;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, ClientInterface $http_client) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $logger);
+
+    $this->httpClient = $http_client;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $p = $container->get('http_client');
+
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('logger.factory')->get('imageapi_optimize'),
+      $container->get('http_client')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function applyToImage($image_uri) {
-    // @TODO: Catch exceptions, better error handling etc.
-
-
     // Need to send the file off to the remote service and await a response.
-    $client = \Drupal::httpClient();
-    $fields = [];
     $fields[] = [
       'name' => 'files',
       'contents' => fopen($image_uri, 'r'),
@@ -36,17 +68,23 @@ class reSmushit extends ConfigurableImageAPIOptimizeProcessorBase {
       ];
     }
 
-    $response = $client->post('http://api.resmush.it/ws.php', ['multipart' => $fields]);
-    $body = $response->getBody();
-    $json = json_decode($body);
-    // If this has worked, we should get a dest entry in the JSON returned.
-    if (isset($json->dest)) {
-      // Now go fetch that, and save it locally.
-      $smushedFile = $client->get($json->dest);
-      if ($smushedFile->getStatusCode() == 200) {
-        file_unmanaged_save_data($smushedFile->getBody(), $image_uri, FILE_EXISTS_REPLACE);
+    try {
+      $response = $this->httpClient->post('http://api.resmush.it/ws.php', ['multipart' => $fields]);
+      $body = $response->getBody();
+      $json = json_decode($body);
+
+      // If this has worked, we should get a dest entry in the JSON returned.
+      if (isset($json->dest)) {
+        // Now go fetch that, and save it locally.
+        $smushedFile = $this->httpClient->get($json->dest);
+        if ($smushedFile->getStatusCode() == 200) {
+          file_unmanaged_save_data($smushedFile->getBody(), $image_uri, FILE_EXISTS_REPLACE);
+          return TRUE;
+        }
       }
-      return TRUE;
+    }
+    catch (RequestException $e) {
+      $this->logger->error('Failed to download optimize image using reSmush.it due to "%error".', array('%error' => $e->getMessage()));
     }
 
     return FALSE;
@@ -56,9 +94,9 @@ class reSmushit extends ConfigurableImageAPIOptimizeProcessorBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array(
+    return [
       'quality' => NULL,
-    );
+    ];
   }
 
   /**
@@ -67,7 +105,8 @@ class reSmushit extends ConfigurableImageAPIOptimizeProcessorBase {
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['quality'] = array(
       '#type' => 'number',
-      '#title' => t('JPG image quality'),
+      '#title' => $this->t('JPEG image quality'),
+      '#description' => $this->t('Optionally specify a quality setting when optimizing JPEG images.'),
       '#default_value' => $this->configuration['quality'],
       '#min' => 1,
       '#max' => 100,

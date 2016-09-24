@@ -3,6 +3,7 @@
 namespace Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Image\ImageInterface;
 use Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase;
 use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase;
@@ -31,8 +32,8 @@ class reSmushit extends ConfigurableImageAPIOptimizeProcessorBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, ClientInterface $http_client) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $logger);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, ImageFactory $image_factory, ClientInterface $http_client) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $logger, $image_factory);
 
     $this->httpClient = $http_client;
   }
@@ -41,13 +42,12 @@ class reSmushit extends ConfigurableImageAPIOptimizeProcessorBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $p = $container->get('http_client');
-
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $container->get('logger.factory')->get('imageapi_optimize'),
+      $container->get('image.factory'),
       $container->get('http_client')
     );
   }

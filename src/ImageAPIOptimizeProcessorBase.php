@@ -2,6 +2,7 @@
 
 namespace Drupal\imageapi_optimize;
 
+use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Psr\Log\LoggerInterface;
@@ -41,13 +42,21 @@ abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements Image
   protected $logger;
 
   /**
+   * The image factory.
+   *
+   * @var \Drupal\Core\Image\ImageFactory
+   */
+  protected $imageFactory;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, ImageFactory $image_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->setConfiguration($configuration);
     $this->logger = $logger;
+    $this->imageFactory = $image_factory;
   }
 
   /**
@@ -58,7 +67,8 @@ abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements Image
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('logger.factory')->get('imageapi_optimize')
+      $container->get('logger.factory')->get('imageapi_optimize'),
+      $container->get('image.factory')
     );
   }
 
@@ -146,4 +156,7 @@ abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements Image
     return array();
   }
 
+  protected function getMimeType($uri) {
+    return $this->imageFactory->get($uri)->getMimeType();
+  }
 }

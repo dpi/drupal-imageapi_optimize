@@ -53,16 +53,6 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'imageapi_optimize/admin';
 
-//    // Show the thumbnail preview.
-//    $preview_arguments = array('#theme' => 'image_style_preview', '#style' => $this->entity);
-//    $form['preview'] = array(
-//      '#type' => 'item',
-//      '#title' => $this->t('Preview'),
-//      '#markup' => drupal_render($preview_arguments),
-//      // Render preview above parent elements.
-//      '#weight' => -5,
-//    );
-
     // Build the list of existing image processors for this image style.
     $form['processors'] = array(
       '#type' => 'table',

@@ -1,9 +1,0 @@
-name = ImageAPI Optimize - Kraken.io integration
-description = Provides Kraken.io as an ImageAPI Optimization processor.
-core = 7.x
-
-dependencies[] = imageapi_optimize
-dependencies[] = kraken
-dependencies[] = libraries
-
-files[] = plugins/ImageAPIOptimizeProcessorKraken.inc

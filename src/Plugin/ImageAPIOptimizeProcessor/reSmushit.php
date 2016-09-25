@@ -4,7 +4,6 @@ namespace Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Image\ImageFactory;
-use Drupal\Core\Image\ImageInterface;
 use Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase;
 use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase;
 use GuzzleHttp\ClientInterface;

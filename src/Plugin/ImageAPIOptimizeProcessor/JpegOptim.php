@@ -3,12 +3,7 @@
 namespace Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Image\ImageInterface;
-use Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase;
-use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase;
-use GuzzleHttp\ClientInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBinaryBase;
 
 /**
  * Uses the JpegOptim binary to optimize images.
@@ -19,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Uses the JpegOptim binary to optimize images.")
  * )
  */
-class JpegOptim extends BinaryBase {
+class JpegOptim extends ImageAPIOptimizeProcessorBinaryBase {
 
   /**
    * {@inheritdoc}

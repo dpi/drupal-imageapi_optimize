@@ -1,20 +1,18 @@
 <?php
 
-namespace Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor;
+namespace Drupal\imageapi_optimize;
 
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Image\ImageInterface;
-use Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase;
-use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Uses the resmush.it webservice to optimize an image.
  */
-abstract class BinaryBase extends ConfigurableImageAPIOptimizeProcessorBase {
+abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIOptimizeProcessorBase {
 
   /**
    * The file system service.
@@ -115,8 +113,9 @@ abstract class BinaryBase extends ConfigurableImageAPIOptimizeProcessorBase {
     if ($return_val == 0) {
       return TRUE;
     }
-
-    return FALSE;
+    else {
+      return FALSE;
+    }
   }
 
   /**
@@ -133,12 +132,20 @@ abstract class BinaryBase extends ConfigurableImageAPIOptimizeProcessorBase {
   }
 
   protected function saveCommandStdoutToFile($cmd, $dst) {
+    $return_val = 0;
     ob_start();
     passthru($cmd);
     $output = ob_get_contents();
     ob_end_clean();
 
     file_unmanaged_save_data($output, $dst, FILE_EXISTS_REPLACE);
+
+    if ($return_val == 0) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
   }
 
   public function getFullPathToBinary() {

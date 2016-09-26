@@ -105,7 +105,7 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
         }
       }
       else {
-        // Flush image style when updating without changing the name.
+        // Flush pipeline when updating without changing the name.
         $this->flush();
       }
     }
@@ -144,6 +144,15 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
    * {@inheritdoc}
    */
   public function flush() {
+
+    // Get all image styles and if they use this pipeline, flush it.
+    $style_storage = $this->entityTypeManager()->getStorage('image_style');
+    foreach ($style_storage->loadMultiple() as $style) {
+      /** @var ImageStyleWithPipeline $style */
+      if ($style->hasPipeline() && $style->getPipelineEntity()->id() == $this->id()) {
+        $style->flush();
+      }
+    }
 
     // Let other modules update as necessary on flush.
     $module_handler = \Drupal::moduleHandler();

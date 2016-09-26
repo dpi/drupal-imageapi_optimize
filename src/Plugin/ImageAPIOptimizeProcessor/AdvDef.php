@@ -51,7 +51,7 @@ class AdvDef extends ImageAPIOptimizeProcessorBinaryBase {
    */
   public function defaultConfiguration() {
     return parent::defaultConfiguration() + [
-      'recompress' => TRU§E,
+      'recompress' => TRUE,
       'mode' => 3,
     ];
   }

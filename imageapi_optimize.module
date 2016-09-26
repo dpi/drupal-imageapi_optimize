@@ -40,7 +40,8 @@ function imageapi_optimize_entity_type_alter(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   if (isset($entity_types['image_style'])) {
     $image_style = $entity_types['image_style'];
-    $image_style->setClass('\Drupal\imageapi_optimize\Entity\ImageStyleWithPipeline');
+    $image_style->setClass('Drupal\imageapi_optimize\Entity\ImageStyleWithPipeline');
+    $image_style->setHandlerClass('list_builder', 'Drupal\imageapi_optimize\ImageStyleWithPipelineListBuilder');
     $config_export = $image_style->get('config_export');
     $config_export[] = 'pipeline';
     $image_style->set('config_export', $config_export);

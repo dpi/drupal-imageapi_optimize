@@ -9,6 +9,9 @@ class ImageStyleWithPipeline extends ImageStyle {
   //@TODO: maybe this should be something other than a 'random' string.
   protected $pipeline = '__default__';
 
+  /**
+   * {@inheritdoc}
+   */
   public function createDerivative($original_uri, $derivative_uri) {
     $result = parent::createDerivative($original_uri, $derivative_uri);
 

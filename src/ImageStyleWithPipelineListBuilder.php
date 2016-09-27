@@ -13,6 +13,11 @@ class ImageStyleWithPipelineListBuilder extends ImageStyleListBuilder {
   public function buildHeader() {
     $header = parent::buildHeader();
     $header['pipeline'] = $this->t('Image Optimize Pipeline');
+
+    // Move 'operations' to the end.
+    $operations = $header['operations'];
+    unset($header['operations']);
+    $header['operations'] = $operations;
     return $header;
   }
 
@@ -24,6 +29,11 @@ class ImageStyleWithPipelineListBuilder extends ImageStyleListBuilder {
     $pipelineNames = imageapi_optimize_pipeline_options(FALSE);
     $row = parent::buildRow($entity);
     $row['pipeline'] = isset($pipelineNames[$entity->getPipeline()]) ? $pipelineNames[$entity->getPipeline()] : '';
+
+    // Move 'operations' to the end.
+    $operations = $row['operations'];
+    unset($row['operations']);
+    $row['operations'] = $operations;
     return $row;
   }
 }

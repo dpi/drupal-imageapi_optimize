@@ -150,7 +150,7 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
 
   public function getFullPathToBinary() {
     if ($this->configuration['manual_executable_path']) {
-      return $this->findExecutablePath($this->configuration['manual_executable_path']);
+      return $this->configuration['manual_executable_path'];
     }
     elseif ($this->findExecutablePath()) {
       return $this->findExecutablePath();

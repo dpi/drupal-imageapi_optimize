@@ -5,7 +5,7 @@ namespace Drupal\imageapi_optimize;
 use Drupal\Core\Plugin\PluginFormInterface;
 
 /**
- * Defines the interface for configurable image effects.
+ * Defines the interface for configurable image optimize processors.
  *
  * @see \Drupal\imageapi_optimize\Annotation\ImageEffect
  * @see \Drupal\imageapi_optimize\ConfigurableImageEffectBase

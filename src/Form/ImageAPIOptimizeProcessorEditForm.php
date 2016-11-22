@@ -6,7 +6,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface;
 
 /**
- * Provides an edit form for image effects.
+ * Provides an edit form for image optimize processors.
  */
 class ImageAPIOptimizeProcessorEditForm extends ImageAPIOptimizeProcessorFormBase {
 

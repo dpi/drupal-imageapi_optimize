@@ -5,15 +5,15 @@ namespace Drupal\imageapi_optimize;
 use Drupal\Core\Config\Entity\ConfigEntityStorage;
 
 /**
- * Storage controller class for "image style" configuration entities.
+ * Storage controller class for "image optimize pipeline" configuration entities.
  */
 class ImageAPIOptimizePipelineStorage extends ConfigEntityStorage implements ImageAPIOptimizePipelineStorageInterface {
 
   /**
-   * Image style replacement memory storage.
+   * Image optimize pipeline replacement memory storage.
    *
    * This value is not stored in the backend. It's used during the deletion of
-   * an image style to save the replacement image style in the same request. The
+   * an image optimize pipeline to save the replacement image optimize pipeline in the same request. The
    * value is used later, when resolving dependencies.
    *
    * @var string[]

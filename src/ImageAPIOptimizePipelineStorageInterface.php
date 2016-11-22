@@ -8,30 +8,30 @@ namespace Drupal\imageapi_optimize;
 interface ImageAPIOptimizePipelineStorageInterface {
 
   /**
-   * Stores a replacement ID for an image style being deleted.
+   * Stores a replacement ID for an image optimize pipeline being deleted.
    *
    * The method stores a replacement style to be used by the configuration
-   * dependency system when a image style is deleted. The replacement style is
+   * dependency system when a image optimize pipeline is deleted. The replacement style is
    * replacing the deleted style in other configuration entities that are
-   * depending on the image style being deleted.
+   * depending on the image optimize pipeline being deleted.
    *
    * @param string $name
-   *   The ID of the image style to be deleted.
+   *   The ID of the image optimize pipeline to be deleted.
    * @param string $replacement
-   *   The ID of the image style used as replacement.
+   *   The ID of the image optimize pipeline used as replacement.
    */
   public function setReplacementId($name, $replacement);
 
   /**
-   * Retrieves the replacement ID of a deleted image style.
+   * Retrieves the replacement ID of a deleted image optimize pipeline.
    *
    * The method is retrieving the value stored by ::setReplacementId().
    *
    * @param string $name
-   *   The ID of the image style to be replaced.
+   *   The ID of the image optimize pipeline to be replaced.
    *
    * @return string|null
-   *   The ID of the image style used as replacement, if there's any, or NULL.
+   *   The ID of the image optimize pipeline used as replacement, if there's any, or NULL.
    *
    * @see \Drupal\imageapi_optimize\ImageStyleStorageInterface::setReplacementId()
    */
@@ -43,7 +43,7 @@ interface ImageAPIOptimizePipelineStorageInterface {
    * The method clears the value previously stored with ::setReplacementId().
    *
    * @param string $name
-   *   The ID of the image style to be replaced.
+   *   The ID of the image optimize pipeline to be replaced.
    *
    * @see \Drupal\imageapi_optimize\ImageStyleStorageInterface::setReplacementId()
    */

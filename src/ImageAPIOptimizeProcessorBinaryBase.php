@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Uses the resmush.it webservice to optimize an image.
+ * Base class for image optimizations that run local binaries.
  */
 abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIOptimizeProcessorBase {
 
@@ -91,6 +91,17 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
     $this->configuration['manual_executable_path'] = $form_state->getValue('manual_executable_path');
   }
 
+  /**
+   * Search the local system for the given executable binary.
+   *
+   * @param null $executable
+   *   The name of the executable binary to find on the local system. If not
+   *   specified the default executeable name for this class will be used.
+   *
+   * @return string|false
+   *   The path to the binary on the local system, or FALSE if it could not be
+   *   located.
+   */
   protected function findExecutablePath($executable = NULL) {
     if (is_null($executable)) {
       $executable = $this->executableName();
@@ -101,8 +112,22 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
     if ($return_var == 0) {
       return $path;
     }
+    return FALSE;
   }
 
+  /**
+   * Execute a shell command on the local system.
+   *
+   * @param $command
+   *   The command to execute.
+   * @param $options
+   *   An array of options for the command. This will not be escaped before executing.
+   * @param $arguments
+   *   An array of arguments for the command. These will be escaped.
+   *
+   * @return bool
+   *   Returns TRUE if the command completed successfully, FALSE otherwise.
+   */
   protected function execShellCommand($command, $options, $arguments) {
     $output = array();
     $return_val = 0;

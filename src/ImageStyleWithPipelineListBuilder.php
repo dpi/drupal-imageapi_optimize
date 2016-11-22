@@ -6,7 +6,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\image\ImageStyleListBuilder;
 
 /**
- * Defines a class to build a listing of image style entities.
+ * Defines a class to build a listing of image optimize pipeline entities.
  *
  * Adds a pipeline column to the table.
  *

@@ -5,7 +5,7 @@ namespace Drupal\imageapi_optimize\Form;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Controller for image style addition forms.
+ * Controller for image optimize pipeline addition forms.
  */
 class ImageAPIOptimizePipelineAddForm extends ImageAPIOptimizePipelineFormBase {
 

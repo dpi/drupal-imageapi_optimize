@@ -6,7 +6,7 @@ use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Creates a form to delete an image style.
+ * Creates a form to delete an image optimize pipeline.
  */
 class ImageAPIOptimizePipelineDeleteForm extends EntityDeleteForm {
 
@@ -57,7 +57,7 @@ class ImageAPIOptimizePipelineDeleteForm extends EntityDeleteForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Save a selected replacement in the image style storage. It will be used
+    // Save a selected replacement in the image optimize pipeline storage. It will be used
     // later, in the same request, when resolving dependencies.
     if ($replacement = $form_state->getValue('replacement')) {
       /** @var \Drupal\imageapi_optimize\ImageAPIOptimizePipelineStorageInterface $storage */
@@ -68,7 +68,7 @@ class ImageAPIOptimizePipelineDeleteForm extends EntityDeleteForm {
   }
 
   /**
-   * Returns a list of image style replacement options.
+   * Returns a list of image optimize pipeline replacement options.
    *
    * @return array
    *   An option list suitable for the form select '#options'.

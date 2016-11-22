@@ -8,12 +8,12 @@ use Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides an add form for image effects.
+ * Provides an add form for image optimize processors.
  */
 class ImageAPIOptimizeProcessorAddForm extends ImageAPIOptimizeProcessorFormBase {
 
   /**
-   * The image effect manager.
+   * The image optimize processor manager.
    *
    * @var \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager
    */
@@ -23,7 +23,7 @@ class ImageAPIOptimizeProcessorAddForm extends ImageAPIOptimizeProcessorFormBase
    * Constructs a new ImageAPIOptimizeProcessorAddForm.
    *
    * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager $effect_manager
-   *   The image effect manager.
+   *   The image optimize processor manager.
    */
   public function __construct(ImageAPIOptimizeProcessorManager $effect_manager) {
     $this->processorManager = $effect_manager;

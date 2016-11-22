@@ -7,19 +7,19 @@ use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\imageapi_optimize\ImageInterface;
 
 /**
- * Defines the interface for image effects.
+ * Defines the interface for image optimize processors.
  *
- * @see \Drupal\imageapi_optimize\Annotation\ImageEffect
- * @see \Drupal\imageapi_optimize\ImageEffectBase
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectInterface
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectBase
- * @see \Drupal\imageapi_optimize\ImageEffectManager
+ * @see \Drupal\imageapi_optimize\Annotation\ImageAPIOptimizeProcessor
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager
  * @see plugin_api
  */
 interface ImageAPIOptimizeProcessorInterface extends PluginInspectionInterface, ConfigurablePluginInterface {
 
   /**
-   * Returns a render array summarizing the configuration of the image effect.
+   * Returns a render array summarizing the configuration of the image optimize processor.
    *
    * @return array
    *   A render array.
@@ -27,51 +27,51 @@ interface ImageAPIOptimizeProcessorInterface extends PluginInspectionInterface, 
   public function getSummary();
 
   /**
-   * Returns the image effect label.
+   * Returns the image optimize processor label.
    *
    * @return string
-   *   The image effect label.
+   *   The image optimize processor label.
    */
   public function label();
 
   /**
-   * Returns the unique ID representing the image effect.
+   * Returns the unique ID representing the image optimize processor.
    *
    * @return string
-   *   The image effect ID.
+   *   The image optimize processor ID.
    */
   public function getUuid();
 
   /**
-   * Returns the weight of the image effect.
+   * Returns the weight of the image optimize processor.
    *
    * @return int|string
-   *   Either the integer weight of the image effect, or an empty string.
+   *   Either the integer weight of the image optimize processor, or an empty string.
    */
   public function getWeight();
 
   /**
-   * Sets the weight for this image effect.
+   * Sets the weight for this image optimize processor.
    *
    * @param int $weight
-   *   The weight for this image effect.
+   *   The weight for this image optimize processor.
    *
    * @return $this
    */
   public function setWeight($weight);
 
   /**
-   * Creates a new image derivative based on this image style.
+   * Apply this image optimize processor to the given image.
    *
-   * Generates an image derivative applying all image effects and saving the
-   * resulting image.
+   * Image processors should modify the file in-place or overwrite the file on
+   * disk with an optimized version.
    *
    * @param string $image_uri
    *   Original image file URI.
    *
    * @return bool
-   *   TRUE if an image derivative was generated, or FALSE if the image
-   *   derivative could not be generated.
+   *   TRUE if an optimized image was generated, or FALSE if the image
+   *   could not be optimized.
    */
   public function applyToImage($image_uri);
 

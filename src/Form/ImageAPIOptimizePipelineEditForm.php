@@ -10,12 +10,12 @@ use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Controller for image style edit form.
+ * Controller for image optimize pipeline edit form.
  */
 class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase {
 
   /**
-   * The image effect manager service.
+   * The image optimize processor manager service.
    *
    * @var \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager
    */
@@ -27,7 +27,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
    * @param \Drupal\Core\Entity\EntityStorageInterface $imageapi_optimize_pipeline_storage
    *   The storage.
    * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager $imageapi_optimize_processor_manager
-   *   The image effect manager service.
+   *   The image optimize processor manager service.
    */
   public function __construct(EntityStorageInterface $imageapi_optimize_pipeline_storage, ImageAPIOptimizeProcessorManager $imageapi_optimize_processor_manager) {
     parent::__construct($imageapi_optimize_pipeline_storage);
@@ -53,7 +53,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'imageapi_optimize/admin';
 
-    // Build the list of existing image processors for this image style.
+    // Build the list of existing image processors for this image optimize pipeline.
     $form['processors'] = array(
       '#type' => 'table',
       '#header' => array(
@@ -180,7 +180,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
   }
 
   /**
-   * Validate handler for image effect.
+   * Validate handler for image optimize processor.
    */
   public function processorValidate($form, FormStateInterface $form_state) {
     if (!$form_state->getValue('new')) {
@@ -189,7 +189,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
   }
 
   /**
-   * Submit handler for image effect.
+   * Submit handler for image optimize processor.
    */
   public function processorSave($form, FormStateInterface $form_state) {
     $this->save($form, $form_state);
@@ -228,7 +228,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    // Update image effect weights.
+    // Update image optimize processor weights.
     if (!$form_state->isValueEmpty('processors')) {
       $this->updateProcessorWeights($form_state->getValue('processors'));
     }
@@ -255,7 +255,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
   }
 
   /**
-   * Updates image effect weights.
+   * Updates image optimize processor weights.
    *
    * @param array $processors
    *   Associative array with effects having effect uuid as keys and array

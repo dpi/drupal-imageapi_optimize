@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Base form for image style add and edit forms.
+ * Base form for image optimize pipeline add and edit forms.
  */
 abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
 
@@ -20,17 +20,17 @@ abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
   protected $entity;
 
   /**
-   * The image style entity storage.
+   * The image optimize pipeline entity storage.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $imageapiOptimizePipelineStorage;
 
   /**
-   * Constructs a base class for image style add and edit forms.
+   * Constructs a base class for image optimize pipeline add and edit forms.
    *
    * @param \Drupal\Core\Entity\EntityStorageInterface $imageapi_optimize_pipeline_storage
-   *   The image style entity storage.
+   *   The image optimize pipeline entity storage.
    */
   public function __construct(EntityStorageInterface $imageapi_optimize_pipeline_storage) {
     $this->imageapiOptimizePipelineStorage = $imageapi_optimize_pipeline_storage;

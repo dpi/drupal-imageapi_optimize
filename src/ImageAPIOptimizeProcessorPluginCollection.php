@@ -5,7 +5,7 @@ namespace Drupal\imageapi_optimize;
 use Drupal\Core\Plugin\DefaultLazyPluginCollection;
 
 /**
- * A collection of image effects.
+ * A collection of image optimize processors.
  */
 class ImageAPIOptimizeProcessorPluginCollection extends DefaultLazyPluginCollection {
 

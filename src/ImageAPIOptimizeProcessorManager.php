@@ -7,14 +7,14 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Manages image effect plugins.
+ * Manages image optimize processor plugins.
  *
- * @see hook_image_effect_info_alter()
- * @see \Drupal\imageapi_optimize\Annotation\ImageEffect
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectInterface
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectBase
- * @see \Drupal\imageapi_optimize\ImageEffectInterface
- * @see \Drupal\imageapi_optimize\ImageEffectBase
+ * @see hook_imageapi_optimize_processor_info_alter()
+ * @see \Drupal\imageapi_optimize\Annotation\ImageAPIOptimizeProcessor
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase
  * @see plugin_api
  */
 class ImageAPIOptimizeProcessorManager extends DefaultPluginManager {

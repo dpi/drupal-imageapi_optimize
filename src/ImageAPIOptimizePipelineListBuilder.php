@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 
 /**
- * Defines a class to build a listing of image style entities.
+ * Defines a class to build a listing of image optimize pipeline entities.
  *
  * @see \Drupal\imageapi_optimize\Entity\ImageStyle
  */

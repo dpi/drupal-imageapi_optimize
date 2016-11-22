@@ -11,19 +11,19 @@ use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Provides a base form for image effects.
+ * Provides a base form for image optimize processors.
  */
 abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
 
   /**
-   * The image style.
+   * The image optimize pipeline.
    *
    * @var \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface
    */
   protected $imageAPIOptimizePipeline;
 
   /**
-   * The image effect.
+   * The image optimize processor.
    *
    * @var \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface|\Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface
    */
@@ -40,9 +40,9 @@ abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
    * {@inheritdoc}
    *
    * @param \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface $imageapi_optimize_pipeline
-   *   The image style.
+   *   The image optimize pipeline.
    * @param string $imageapi_optimize_processor
-   *   The image effect ID.
+   *   The image optimize processor ID.
    *
    * @return array
    *   The form structure.
@@ -78,7 +78,7 @@ abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
     $form['data'] = $this->imageAPIOptimizeProcessor->buildConfigurationForm($form['data'], $subform_state);
     $form['data']['#tree'] = TRUE;
 
-    // Check the URL for a weight, then the image effect, otherwise use default.
+    // Check the URL for a weight, then the image optimize processor, otherwise use default.
     $form['weight'] = array(
       '#type' => 'hidden',
       '#value' => $request->query->has('weight') ? (int) $request->query->get('weight') : $this->imageAPIOptimizeProcessor->getWeight(),
@@ -102,7 +102,7 @@ abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // The image effect configuration is stored in the 'data' key in the form,
+    // The image optimize processor configuration is stored in the 'data' key in the form,
     // pass that through for validation.
     $this->imageAPIOptimizeProcessor->validateConfigurationForm($form['data'], SubformState::createForSubform($form['data'], $form, $form_state));
   }
@@ -113,7 +113,7 @@ abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_state->cleanValues();
 
-    // The image effect configuration is stored in the 'data' key in the form,
+    // The image optimize processor configuration is stored in the 'data' key in the form,
     // pass that through for submission.
     $this->imageAPIOptimizeProcessor->submitConfigurationForm($form['data'], SubformState::createForSubform($form['data'], $form, $form_state));
 
@@ -128,13 +128,13 @@ abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
   }
 
   /**
-   * Converts an image effect ID into an object.
+   * Converts an image optimize processor ID into an object.
    *
    * @param string $imageapi_optimize_processor
-   *   The image effect ID.
+   *   The image optimize processor ID.
    *
    * @return \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface
-   *   The image effect object.
+   *   The image optimize processor object.
    */
   abstract protected function prepareImageAPIOptimizeProcessor($imageapi_optimize_processor);
 

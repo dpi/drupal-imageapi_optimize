@@ -5,7 +5,7 @@ namespace Drupal\imageapi_optimize;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
- * Provides an interface defining an image style entity.
+ * Provides an interface defining an image optimize pipeline entity.
  */
 interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
 
@@ -13,7 +13,7 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
    * Returns the replacement ID.
    *
    * @return string|null
-   *   The replacement image style ID or NULL if no replacement has been
+   *   The replacement image optimize pipeline ID or NULL if no replacement has been
    *   selected.
    *
    * @deprecated in Drupal 8.0.x, will be removed before Drupal 9.0.x. Use
@@ -24,18 +24,18 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   public function getReplacementID();
 
   /**
-   * Returns the image style.
+   * Returns the image optimize pipeline.
    *
    * @return string
-   *   The name of the image style.
+   *   The name of the image optimize pipeline.
    */
   public function getName();
 
   /**
-   * Sets the name of the image style.
+   * Sets the name of the image optimize pipeline.
    *
    * @param string $name
-   *   The name of the image style.
+   *   The name of the image optimize pipeline.
    *
    * @return \Drupal\imageapi_optimize\ImageStyleInterface
    *   The class instance this method is called on.
@@ -43,40 +43,40 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   public function setName($name);
 
   /**
-   * Returns a specific image effect.
+   * Returns a specific image optimize processor.
    *
    * @param string $effect
-   *   The image effect ID.
+   *   The image optimize processor ID.
    *
    * @return \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface
-   *   The image effect object.
+   *   The image optimize processor object.
    */
   public function getProcessor($processor);
 
   /**
-   * Returns the image effects for this style.
+   * Returns the image optimize processors for this style.
    *
    * @return \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorPluginCollection|\Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface[]
-   *   The image effect plugin collection.
+   *   The image optimize processor plugin collection.
    */
   public function getProcessors();
 
   /**
-   * Saves an image effect for this style.
+   * Saves an image optimize processor for this style.
    *
    * @param array $configuration
-   *   An array of image effect configuration.
+   *   An array of image optimize processor configuration.
    *
    * @return string
-   *   The image effect ID.
+   *   The image optimize processor ID.
    */
   public function addProcessor(array $configuration);
 
   /**
-   * Deletes an image effect from this style.
+   * Deletes an image optimize processor from this style.
    *
    * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface $effect
-   *   The image effect object.
+   *   The image optimize processor object.
    *
    * @return $this
    */
@@ -90,9 +90,9 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   public function flush();
 
   /**
-   * Creates a new image derivative based on this image style.
+   * Creates a new image derivative based on this image optimize pipeline.
    *
-   * Generates an image derivative applying all image effects and saving the
+   * Generates an image derivative applying all image optimize processors and saving the
    * resulting image.
    *
    * @param string $image_uri

@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a base class for image effects.
+ * Provides a base class for image optimize processors.
  *
  * @see \Drupal\imageapi_optimize\Annotation\ImageEffect
  * @see \Drupal\imageapi_optimize\ImageEffectInterface
@@ -21,14 +21,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements ImageAPIOptimizeProcessorInterface, ContainerFactoryPluginInterface {
 
   /**
-   * The image effect ID.
+   * The image optimize processor ID.
    *
    * @var string
    */
   protected $uuid;
 
   /**
-   * The weight of the image effect.
+   * The weight of the image optimize processor.
    *
    * @var int|string
    */

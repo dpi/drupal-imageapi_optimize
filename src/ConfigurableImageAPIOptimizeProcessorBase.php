@@ -5,7 +5,7 @@ namespace Drupal\imageapi_optimize;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Provides a base class for configurable image effects.
+ * Provides a base class for configurable image optimize processors.
  *
  * @see \Drupal\imageapi_optimize\Annotation\ImageEffect
  * @see \Drupal\imageapi_optimize\ConfigurableImageEffectInterface

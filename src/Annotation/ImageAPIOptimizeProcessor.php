@@ -5,7 +5,7 @@ namespace Drupal\imageapi_optimize\Annotation;
 use Drupal\Component\Annotation\Plugin;
 
 /**
- * Defines an image effect annotation object.
+ * Defines an image optimize processor annotation object.
  *
  * Plugin Namespace: Plugin\ImageEffect
  *
@@ -33,7 +33,7 @@ class ImageAPIOptimizeProcessor extends Plugin {
   public $id;
 
   /**
-   * The human-readable name of the image effect.
+   * The human-readable name of the image optimize processor.
    *
    * @ingroup plugin_translatable
    *
@@ -42,9 +42,9 @@ class ImageAPIOptimizeProcessor extends Plugin {
   public $label;
 
   /**
-   * A brief description of the image effect.
+   * A brief description of the image optimize processor.
    *
-   * This will be shown when adding or configuring this image effect.
+   * This will be shown when adding or configuring this image optimize processor.
    *
    * @ingroup plugin_translatable
    *

@@ -18,7 +18,7 @@ use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 /**
- * Defines an image style configuration entity.
+ * Defines an image optimize pipeline configuration entity.
  *
  * @ConfigEntityType(
  *   id = "imageapi_optimize_pipeline",
@@ -55,28 +55,28 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay;
 class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptimizePipelineInterface, EntityWithPluginCollectionInterface {
 
   /**
-   * The name of the image style.
+   * The name of the image optimize pipeline.
    *
    * @var string
    */
   protected $name;
 
   /**
-   * The image style label.
+   * The image optimize pipeline label.
    *
    * @var string
    */
   protected $label;
 
   /**
-   * The array of image effects for this image style.
+   * The array of image optimize processors for this image optimize pipeline.
    *
    * @var array
    */
   protected $processors = array();
 
   /**
-   * Holds the collection of image effects that are used by this image style.
+   * Holds the collection of image optimize processors that are used by this image optimize pipeline.
    *
    * @var \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorPluginCollection
    */
@@ -97,7 +97,7 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
 
     if ($update) {
       if (!empty($this->original) && $this->id() !== $this->original->id()) {
-        // The old image style name needs flushing after a rename.
+        // The old image optimize pipeline name needs flushing after a rename.
         $this->original->flush();
         // Update field settings if necessary.
         if (!$this->isSyncing()) {
@@ -128,14 +128,14 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
   }
 
   /**
-   * Update field settings if the image style name is changed.
+   * Update field settings if the image optimize pipeline name is changed.
    *
    * @param \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface $style
-   *   The image style.
+   *   The image optimize pipeline.
    */
   protected static function replaceImageAPIOptimizePipeline(ImageAPIOptimizePipelineInterface $style) {
     if ($style->id() != $style->getOriginalId()) {
-      // Loop through all image styles looking for usages.
+      // Loop through all image optimize pipelines looking for usages.
 
     }
   }
@@ -145,7 +145,7 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
    */
   public function flush() {
 
-    // Get all image styles and if they use this pipeline, flush it.
+    // Get all image optimize pipelines and if they use this pipeline, flush it.
     $style_storage = $this->entityTypeManager()->getStorage('image_style');
     foreach ($style_storage->loadMultiple() as $style) {
       /** @var ImageStyleWithPipeline $style */
@@ -248,10 +248,10 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
   }
 
   /**
-   * Returns the image effect plugin manager.
+   * Returns the image optimize processor plugin manager.
    *
    * @return \Drupal\Component\Plugin\PluginManagerInterface
-   *   The image effect plugin manager.
+   *   The image optimize processor plugin manager.
    */
   protected function getImageAPIOptimizeProcessorPluginManager() {
     return \Drupal::service('plugin.manager.imageapi_optimize.processor');

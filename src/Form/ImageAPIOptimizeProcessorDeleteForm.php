@@ -7,19 +7,19 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface;
 
 /**
- * Form for deleting an image effect.
+ * Form for deleting an image optimize processor.
  */
 class ImageAPIOptimizeProcessorDeleteForm extends ConfirmFormBase {
 
   /**
-   * The image style containing the image effect to be deleted.
+   * The image optimize pipeline containing the image optimize processor to be deleted.
    *
    * @var \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface
    */
   protected $imageAPIOptimizePipeline;
 
   /**
-   * The image effect to be deleted.
+   * The image optimize processor to be deleted.
    *
    * @var \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface
    */

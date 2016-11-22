@@ -1,3 +1,11 @@
+entity.imageapi_optimize_pipeline.collection:
+  path: '/admin/config/media/imageapi-optimize-pipelines'
+  defaults:
+    _entity_list: 'imageapi_optimize_pipeline'
+    _title: 'Image Optimize pipelines'
+  requirements:
+    _permission: 'administer imageapi optimize pipelines'
+
 imageapi_optimize.pipeline_add:
   path: '/admin/config/media/imageapi-optimize-pipelines/add'
   defaults:
@@ -35,14 +43,6 @@ imageapi_optimize.processor_delete:
   defaults:
     _form: '\Drupal\imageapi_optimize\Form\ImageAPIOptimizeProcessorDeleteForm'
     _title: 'Delete Image Optimize processor'
-  requirements:
-    _permission: 'administer imageapi optimize pipelines'
-
-entity.imageapi_optimize_pipeline.collection:
-  path: '/admin/config/media/imageapi-optimize-pipelines'
-  defaults:
-    _entity_list: 'imageapi_optimize_pipeline'
-    _title: 'Image Optimize pipelines'
   requirements:
     _permission: 'administer imageapi optimize pipelines'
 

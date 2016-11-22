@@ -5,6 +5,13 @@ namespace Drupal\imageapi_optimize;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\image\ImageStyleListBuilder;
 
+/**
+ * Defines a class to build a listing of image style entities.
+ *
+ * Adds a pipeline column to the table.
+ *
+ * @see \Drupal\image\Entity\ImageStyle
+ */
 class ImageStyleWithPipelineListBuilder extends ImageStyleListBuilder {
 
   /**

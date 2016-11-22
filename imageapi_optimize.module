@@ -55,7 +55,7 @@ function imageapi_optimize_form_image_style_edit_form_alter(&$form, \Drupal\Core
   $entity = $form_state->getFormObject()->getEntity();
   $form['pipeline'] = [
     '#type' => 'select',
-    '#title' => t('ImageAPI Optimize Pipeline'),
+    '#title' => t('Image Optimize Pipeline'),
     '#options' => imageapi_optimize_pipeline_options(),
     '#default_value' => $entity->getPipeline(),
     '#description' => t('Optionally select an Image Optimization pipeline which will be applied after all effects in this image style.'),

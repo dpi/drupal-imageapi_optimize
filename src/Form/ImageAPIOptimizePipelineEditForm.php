@@ -218,7 +218,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
       $processor_id = $this->entity->addProcessor($processor);
       $this->entity->save();
       if (!empty($processor_id)) {
-        drupal_set_message($this->t('The imageapi optimize processor was successfully applied.'));
+        drupal_set_message($this->t('The Image Optimize processor was successfully applied.'));
       }
     }
   }

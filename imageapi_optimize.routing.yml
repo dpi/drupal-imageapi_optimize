@@ -2,7 +2,7 @@ imageapi_optimize.pipeline_add:
   path: '/admin/config/media/imageapi-optimize-pipelines/add'
   defaults:
     _entity_form: imageapi_optimize_pipeline.add
-    _title: 'Add ImageAPI Optimize pipeline'
+    _title: 'Add Image Optimize pipeline'
   requirements:
     _permission: 'administer imageapi optimize pipelines'
 
@@ -34,7 +34,7 @@ imageapi_optimize.processor_delete:
   path: '/admin/config/media/imageapi-optimize-pipelines/manage/{imageapi_optimize_pipeline}/processors/{imageapi_optimize_processor}/delete'
   defaults:
     _form: '\Drupal\imageapi_optimize\Form\ImageAPIOptimizeProcessorDeleteForm'
-    _title: 'Delete imageAPI optimize processor'
+    _title: 'Delete Image Optimize processor'
   requirements:
     _permission: 'administer imageapi optimize pipelines'
 
@@ -42,7 +42,7 @@ entity.imageapi_optimize_pipeline.collection:
   path: '/admin/config/media/imageapi-optimize-pipelines'
   defaults:
     _entity_list: 'imageapi_optimize_pipeline'
-    _title: 'ImageAPI Optimize pipelines'
+    _title: 'Image Optimize pipelines'
   requirements:
     _permission: 'administer imageapi optimize pipelines'
 
@@ -50,7 +50,7 @@ imageapi_optimize.processor_add_form:
   path: '/admin/config/media/imageapi-optimize-pipelines/manage/{imageapi_optimize_pipeline}/add/{imageapi_optimize_processor}'
   defaults:
     _form: '\Drupal\imageapi_optimize\Form\ImageAPIOptimizeProcessorAddForm'
-    _title: 'Add ImageAPI Optimize processor'
+    _title: 'Add Image Optimize processor'
   requirements:
     _permission: 'administer imageapi optimize pipelines'
 
@@ -58,6 +58,6 @@ imageapi_optimize.processor_edit_form:
   path: '/admin/config/media/imageapi-optimize-pipelines/manage/{imageapi_optimize_pipeline}/processors/{imageapi_optimize_processor}'
   defaults:
     _form: '\Drupal\imageapi_optimize\Form\ImageAPIOptimizeProcessorEditForm'
-    _title: 'Edit ImageAPI Optimizer processor'
+    _title: 'Edit Image Optimizer processor'
   requirements:
     _permission: 'administer imageapi optimize pipelines'

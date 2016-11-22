@@ -14,7 +14,7 @@ class ImageAPIOptimizePipelineFlushForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to apply the updated %name imageapi optimize pipeline to all images?', array('%name' => $this->entity->label()));
+    return $this->t('Are you sure you want to apply the updated %name Image Optimize pipeline to all images?', array('%name' => $this->entity->label()));
   }
 
   /**
@@ -43,7 +43,7 @@ class ImageAPIOptimizePipelineFlushForm extends EntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->flush();
-    drupal_set_message($this->t('The imageapi optimize pipeline %name has been flushed.', array('%name' => $this->entity->label())));
+    drupal_set_message($this->t('The Image Optimize pipeline %name has been flushed.', array('%name' => $this->entity->label())));
     $form_state->setRedirectUrl($this->getCancelUrl());
   }
 

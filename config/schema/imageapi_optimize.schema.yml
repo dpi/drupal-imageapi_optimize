@@ -2,7 +2,7 @@
 
 imageapi_optimize.pipeline.*:
   type: config_entity
-  label: 'Imageapi Optimize pipeline'
+  label: 'Image Optimize pipeline'
   mapping:
     name:
       type: string
@@ -32,4 +32,4 @@ imageapi_optimize.settings:
   mapping:
     default_pipeline:
       type: string
-      label: 'Default ImageAPI Optimize pipeline'
+      label: 'Default Image Optimize pipeline'

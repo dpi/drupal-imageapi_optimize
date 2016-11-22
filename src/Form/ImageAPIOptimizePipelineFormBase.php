@@ -52,7 +52,7 @@ abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
 
     $form['label'] = array(
       '#type' => 'textfield',
-      '#title' => $this->t('ImageAPI optimize pipeline name'),
+      '#title' => $this->t('Image optimize pipeline name'),
       '#default_value' => $this->entity->label(),
       '#required' => TRUE,
     );

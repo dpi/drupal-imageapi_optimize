@@ -22,7 +22,7 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay;
  *
  * @ConfigEntityType(
  *   id = "imageapi_optimize_pipeline",
- *   label = @Translation("ImageAPI Optimize Pipeline"),
+ *   label = @Translation("Image Optimize Pipeline"),
  *   handlers = {
  *     "form" = {
  *       "add" = "Drupal\imageapi_optimize\Form\ImageAPIOptimizePipelineAddForm",

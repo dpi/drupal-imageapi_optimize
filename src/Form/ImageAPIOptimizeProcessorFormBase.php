@@ -123,7 +123,7 @@ abstract class ImageAPIOptimizeProcessorFormBase extends FormBase {
     }
     $this->imageAPIOptimizePipeline->save();
 
-    drupal_set_message($this->t('The imageapi optimize processor was successfully applied.'));
+    drupal_set_message($this->t('The Image Optimize processor was successfully applied.'));
     $form_state->setRedirectUrl($this->imageAPIOptimizePipeline->urlInfo('edit-form'));
   }
 

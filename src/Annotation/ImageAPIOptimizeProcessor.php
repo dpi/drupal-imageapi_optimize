@@ -7,18 +7,17 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines an image optimize processor annotation object.
  *
- * Plugin Namespace: Plugin\ImageEffect
+ * Plugin Namespace: Plugin\ImageAPIOptimizeProcessor
  *
  * For a working example, see
- * \Drupal\imageapi_optimize\Plugin\ImageEffect\ResizeImageEffect
+ * \Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor\reSmushit
  *
  * @see hook_image_effect_info_alter()
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectInterface
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectBase
- * @see \Drupal\imageapi_optimize\ImageEffectInterface
- * @see \Drupal\imageapi_optimize\ImageEffectBase
- * @see \Drupal\imageapi_optimize\ImageEffectManager
- * @see \Drupal\Core\ImageToolkit\Annotation\ImageToolkitOperation
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager
  * @see plugin_api
  *
  * @Annotation

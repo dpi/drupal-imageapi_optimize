@@ -17,9 +17,9 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
    *   selected.
    *
    * @deprecated in Drupal 8.0.x, will be removed before Drupal 9.0.x. Use
-   *   \Drupal\imageapi_optimize\ImageStyleStorageInterface::getReplacementId() instead.
+   *   \Drupal\imageapi_optimize\ImageAPIOptimizePipelineStorageInterface::getReplacementId() instead.
    *
-   * @see \Drupal\imageapi_optimize\ImageStyleStorageInterface::getReplacementId()
+   * @see \Drupal\imageapi_optimize\ImageAPIOptimizePipelineStorageInterface::getReplacementId()
    */
   public function getReplacementID();
 
@@ -37,7 +37,7 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
    * @param string $name
    *   The name of the image optimize pipeline.
    *
-   * @return \Drupal\imageapi_optimize\ImageStyleInterface
+   * @return \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface
    *   The class instance this method is called on.
    */
   public function setName($name);
@@ -62,7 +62,7 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   public function getProcessors();
 
   /**
-   * Saves an image optimize processor for this style.
+   * Saves an image optimize processor for this pipeline.
    *
    * @param array $configuration
    *   An array of image optimize processor configuration.
@@ -73,7 +73,7 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   public function addProcessor(array $configuration);
 
   /**
-   * Deletes an image optimize processor from this style.
+   * Deletes an image optimize processor from this pipeline.
    *
    * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface $effect
    *   The image optimize processor object.

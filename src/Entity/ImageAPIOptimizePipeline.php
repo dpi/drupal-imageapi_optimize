@@ -130,11 +130,11 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
   /**
    * Update field settings if the image optimize pipeline name is changed.
    *
-   * @param \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface $style
+   * @param \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface $pipeline
    *   The image optimize pipeline.
    */
-  protected static function replaceImageAPIOptimizePipeline(ImageAPIOptimizePipelineInterface $style) {
-    if ($style->id() != $style->getOriginalId()) {
+  protected static function replaceImageAPIOptimizePipeline(ImageAPIOptimizePipelineInterface $pipeline) {
+    if ($pipeline->id() != $pipeline->getOriginalId()) {
       // Loop through all image optimize pipelines looking for usages.
 
     }

@@ -4,14 +4,50 @@ namespace Drupal\imageapi_optimize;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a class to build a listing of image optimize pipeline entities.
  *
- * @see \Drupal\imageapi_optimize\Entity\ImageStyle
+ * @see \Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline
  */
 class ImageAPIOptimizePipelineListBuilder extends ConfigEntityListBuilder {
+
+  /**
+   * A form builder.
+   *
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected $formBuilder;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    return new static(
+      $entity_type,
+      $container->get('entity.manager')->getStorage($entity_type->id()),
+      $container->get('form_builder')
+    );
+  }
+
+  /**
+   * Constructs a new EntityListBuilder object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type definition.
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   *   The entity storage class.
+   */
+  public function __construct(EntityTypeInterface $entity_type, ImageAPIOptimizePipelineStorageInterface $storage, FormBuilderInterface $form_builder) {
+    $this->entityTypeId = $entity_type->id();
+    $this->storage = $storage;
+    $this->entityType = $entity_type;
+    $this->formBuilder = $form_builder;
+  }
 
   /**
    * {@inheritdoc}
@@ -52,7 +88,7 @@ class ImageAPIOptimizePipelineListBuilder extends ConfigEntityListBuilder {
     $build['table']['#empty'] = $this->t('There are currently no pipelines. <a href=":url">Add a new one</a>.', [
       ':url' => Url::fromRoute('imageapi_optimize.pipeline_add')->toString(),
     ]);
-    $build['config_form'] = \Drupal::formBuilder()->getForm('Drupal\imageapi_optimize\Form\ImageAPIOptimizeDefaultPipelineConfigForm');
+    $build['config_form'] = $this->formBuilder->getForm('Drupal\imageapi_optimize\Form\ImageAPIOptimizeDefaultPipelineConfigForm');
     return $build;
   }
 

@@ -22,11 +22,11 @@ class ImageAPIOptimizeProcessorAddForm extends ImageAPIOptimizeProcessorFormBase
   /**
    * Constructs a new ImageAPIOptimizeProcessorAddForm.
    *
-   * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager $effect_manager
+   * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager $processor_manager
    *   The image optimize processor manager.
    */
-  public function __construct(ImageAPIOptimizeProcessorManager $effect_manager) {
-    $this->processorManager = $effect_manager;
+  public function __construct(ImageAPIOptimizeProcessorManager $processor_manager) {
+    $this->processorManager = $processor_manager;
   }
 
   /**
@@ -55,7 +55,7 @@ class ImageAPIOptimizeProcessorAddForm extends ImageAPIOptimizeProcessorFormBase
    */
   protected function prepareImageAPIOptimizeProcessor($imageapi_optimize_processor) {
     $imageapi_optimize_processor = $this->processorManager->createInstance($imageapi_optimize_processor);
-    // Set the initial weight so this effect comes last.
+    // Set the initial weight so this processor comes last.
     $imageapi_optimize_processor->setWeight(count($this->imageAPIOptimizePipeline->getProcessors()));
     return $imageapi_optimize_processor;
   }

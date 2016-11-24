@@ -10,9 +10,9 @@ interface ImageAPIOptimizePipelineStorageInterface {
   /**
    * Stores a replacement ID for an image optimize pipeline being deleted.
    *
-   * The method stores a replacement style to be used by the configuration
-   * dependency system when a image optimize pipeline is deleted. The replacement style is
-   * replacing the deleted style in other configuration entities that are
+   * The method stores a replacement pipeline to be used by the configuration
+   * dependency system when a image optimize pipeline is deleted. The replacement pipeline is
+   * replacing the deleted pipeline in other configuration entities that are
    * depending on the image optimize pipeline being deleted.
    *
    * @param string $name
@@ -33,7 +33,7 @@ interface ImageAPIOptimizePipelineStorageInterface {
    * @return string|null
    *   The ID of the image optimize pipeline used as replacement, if there's any, or NULL.
    *
-   * @see \Drupal\imageapi_optimize\ImageStyleStorageInterface::setReplacementId()
+   * @see \Drupal\imageapi_optimize\ImageAPIOptimizePipelineStorageInterface::setReplacementId()
    */
   public function getReplacementId($name);
 
@@ -45,7 +45,7 @@ interface ImageAPIOptimizePipelineStorageInterface {
    * @param string $name
    *   The ID of the image optimize pipeline to be replaced.
    *
-   * @see \Drupal\imageapi_optimize\ImageStyleStorageInterface::setReplacementId()
+   * @see \Drupal\imageapi_optimize\ImageAPIOptimizePipelineStorageInterface::setReplacementId()
    */
   public function clearReplacementId($name);
 

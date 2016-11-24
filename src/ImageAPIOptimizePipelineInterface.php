@@ -45,7 +45,7 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   /**
    * Returns a specific image optimize processor.
    *
-   * @param string $effect
+   * @param string $processor
    *   The image optimize processor ID.
    *
    * @return \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface
@@ -54,7 +54,7 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   public function getProcessor($processor);
 
   /**
-   * Returns the image optimize processors for this style.
+   * Returns the image optimize processors for this pipeline.
    *
    * @return \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorPluginCollection|\Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface[]
    *   The image optimize processor plugin collection.
@@ -75,12 +75,12 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   /**
    * Deletes an image optimize processor from this pipeline.
    *
-   * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface $effect
+   * @param \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface $processor
    *   The image optimize processor object.
    *
    * @return $this
    */
-  public function deleteProcessor(ImageAPIOptimizeProcessorInterface $effect);
+  public function deleteProcessor(ImageAPIOptimizeProcessorInterface $processor);
 
   /**
    * Flushes cached media for this pipeline.

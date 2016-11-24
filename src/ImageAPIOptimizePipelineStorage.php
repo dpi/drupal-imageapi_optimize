@@ -18,7 +18,7 @@ class ImageAPIOptimizePipelineStorage extends ConfigEntityStorage implements Ima
    *
    * @var string[]
    *
-   * @see \Drupal\imageapi_optimize\Form\ImageStyleDeleteForm::submitForm()
+   * @see \Drupal\imageapi_optimize\Form\ImageAPIOptimizePipelineDeleteForm::submitForm()
    */
   protected $replacement = [];
 

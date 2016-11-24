@@ -69,9 +69,9 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
         ),
       ),
       '#attributes' => array(
-        'id' => 'image-style-processors',
+        'id' => 'image-pipeline-processors',
       ),
-      '#empty' => t('There are currently no processors in this style. Add one by selecting an option below.'),
+      '#empty' => t('There are currently no processors in this pipeline. Add one by selecting an option below.'),
       // Render processors below parent elements.
       '#weight' => 5,
     );
@@ -161,7 +161,7 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
           ),
         ),
       ),
-      '#prefix' => '<div class="image-style-new">',
+      '#prefix' => '<div class="image-pipeline-new">',
       '#suffix' => '</div>',
     );
 
@@ -258,8 +258,8 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
    * Updates image optimize processor weights.
    *
    * @param array $processors
-   *   Associative array with effects having effect uuid as keys and array
-   *   with effect data as values.
+   *   Associative array with processors having processor uuid as keys and array
+   *   with processor data as values.
    */
   protected function updateProcessorWeights(array $processors) {
     foreach ($processors as $uuid => $processor_data) {

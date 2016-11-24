@@ -11,11 +11,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a base class for image optimize processors.
  *
- * @see \Drupal\imageapi_optimize\Annotation\ImageEffect
- * @see \Drupal\imageapi_optimize\ImageEffectInterface
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectInterface
- * @see \Drupal\imageapi_optimize\ConfigurableImageEffectBase
- * @see \Drupal\imageapi_optimize\ImageEffectManager
+ * @see \Drupal\imageapi_optimize\Annotation\ImageAPIOptimizeProcessor
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface
+ * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase
+ * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager
  * @see plugin_api
  */
 abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements ImageAPIOptimizeProcessorInterface, ContainerFactoryPluginInterface {

@@ -192,8 +192,8 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
   /**
    * {@inheritdoc}
    */
-  public function getProcessor($effect) {
-    return $this->getProcessors()->get($effect);
+  public function getProcessor($processor) {
+    return $this->getProcessors()->get($processor);
   }
 
   /**

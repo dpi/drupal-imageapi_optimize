@@ -12,7 +12,7 @@ use Drupal\Component\Annotation\Plugin;
  * For a working example, see
  * \Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor\reSmushit
  *
- * @see hook_image_effect_info_alter()
+ * @see hook_imageapi_optimize_processor_info_alter()
  * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface
  * @see \Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase
  * @see \Drupal\imageapi_optimize\ImageAPIOptimizePipelineInterface

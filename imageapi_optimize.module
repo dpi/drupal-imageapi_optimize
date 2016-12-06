@@ -49,6 +49,15 @@ function imageapi_optimize_entity_type_alter(array &$entity_types) {
 }
 
 /**
+ * Implements hook_config_schema_info_alter().
+ */
+function imageapi_optimize_config_schema_info_alter(&$definitions) {
+  if (isset($definitions['image.style.*'])) {
+    $definitions['image.style.*']['mapping']['pipeline']['type'] = 'string';
+  }
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function imageapi_optimize_form_image_style_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {

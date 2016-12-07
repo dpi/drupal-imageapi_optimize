@@ -44,7 +44,7 @@ class ImageStyleWithPipeline extends ImageStyle {
       else {
         $pipelineId = $this->pipeline;
       }
-      if ($pipeline = $storage->load($pipelineId)) {
+      if (!empty($pipelineId) && ($pipeline = $storage->load($pipelineId))) {
         return $pipeline;
       }
     }

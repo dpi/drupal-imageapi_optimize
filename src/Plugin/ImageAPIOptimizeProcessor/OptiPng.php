@@ -88,6 +88,7 @@ class OptiPng extends ImageAPIOptimizeProcessorBinaryBase {
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     parent::submitConfigurationForm($form, $form_state);
 
-    $this->configuration['progressive'] = $form_state->getValue('progressive');
+    $this->configuration['level'] = $form_state->getValue('level');
+    $this->configuration['interlace'] = $form_state->getValue('interlace');
   }
 }

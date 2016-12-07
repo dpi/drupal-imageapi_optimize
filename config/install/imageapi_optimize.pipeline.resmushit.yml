@@ -7,6 +7,6 @@ processors:
   b160a7b4-debf-494c-89e6-049a7f787859:
     uuid: b160a7b4-debf-494c-89e6-049a7f787859
     id: resmushit
-    weight: '1'
+    weight: 1
     data:
-      quality: ''
+      quality: 

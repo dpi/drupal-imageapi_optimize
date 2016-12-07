@@ -85,7 +85,7 @@ class JpegOptim extends ImageAPIOptimizeProcessorBinaryBase {
         1 => t('Progressive'),
       ),
       '#default_value' => $this->configuration['progressive'],
-      '#description' => t('If "No change" is select, the output will have the same as the input.'),
+      '#description' => t('If "No change" is selected, the output will have the same as the input.'),
     );
 
     $form['quality'] = array(

@@ -9,7 +9,7 @@ use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBinaryBase;
  * Uses the AdvPng binary to optimize images.
  *
  * @ImageAPIOptimizeProcessor(
- *   id = "advdpng",
+ *   id = "advpng",
  *   label = @Translation("AdvPng"),
  *   description = @Translation("Uses the AdvPng binary to optimize images.")
  * )

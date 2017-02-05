@@ -176,6 +176,11 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
 
     foreach ($this->getProcessors() as $processor) {
       $processor->applyToImage($image_uri);
+      // The file may have changed on disk after each processor has been
+      // applied, and PHP has a cache of file size information etc. so clear
+      // it here so that later calls to filesize() etc. get the correct
+      // information
+      clearstatcache();
     }
   }
 

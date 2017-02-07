@@ -2,10 +2,32 @@
 
 namespace Drupal\imageapi_optimize;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
+
 /**
  * Hook implementations for the Image Optimize module.
  */
 class ImageAPIOptimizeHookImplementations {
+
+  use StringTranslationTrait;
+
+  /**
+   * The stream wrapper manager service.
+   *
+   * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface
+   */
+  protected $stringTranslation;
+
+  /**
+   * Constructs a new ImageAPIOptimizeHookImplementations object.
+   *
+   * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
+   *   The stream translation service.
+   */
+  public function __construct(TranslationInterface $string_translation) {
+    $this->stringTranslation = $string_translation;
+  }
 
   /**
    * Implements hook_entity_type_alter().
@@ -29,10 +51,10 @@ class ImageAPIOptimizeHookImplementations {
     $entity = $form_state->getFormObject()->getEntity();
     $form['pipeline'] = [
       '#type' => 'select',
-      '#title' => t('Image Optimize Pipeline'),
+      '#title' => $this->t('Image Optimize Pipeline'),
       '#options' => imageapi_optimize_pipeline_options(),
       '#default_value' => $entity->getPipeline(),
-      '#description' => t('Optionally select an Image Optimization pipeline which will be applied after all effects in this image style.'),
+      '#description' => $this->t('Optionally select an Image Optimization pipeline which will be applied after all effects in this image style.'),
       '#weight' => 10,
     ];
   }

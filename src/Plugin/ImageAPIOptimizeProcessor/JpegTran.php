@@ -61,7 +61,7 @@ class JpegTran extends ImageAPIOptimizeProcessorBinaryBase {
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $form['progressive'] = array(
-      '#title' => t('Progressive'),
+      '#title' => $this->t('Progressive'),
       '#type' => 'checkbox',
       '#default_value' => $this->configuration['progressive'],
     );

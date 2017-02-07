@@ -68,12 +68,12 @@ class OptiPng extends ImageAPIOptimizeProcessorBinaryBase {
     );
 
     $form['interlace'] = array(
-      '#title' => t('Interlace'),
+      '#title' => $this->t('Interlace'),
       '#type' => 'select',
       '#options' => array(
-        '' => t('No change'),
-        0 => t('Non-interlaced'),
-        1 => t('Interlaced'),
+        '' => $this->t('No change'),
+        0 => $this->t('Non-interlaced'),
+        1 => $this->t('Interlaced'),
       ),
       '#default_value' => $this->configuration['interlace'],
       '#description' => t('If "No change" is select, the output will have the same interlace type as the input.'),

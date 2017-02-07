@@ -61,22 +61,22 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
     if (!$this->findExecutablePath()) {
       $form['executable'] = array(
         '#type' => 'item',
-        '#title' => t('Executable'),
-        '#markup' => t('The @binary binary must be installed, please install or specify the path to the @binary executable directly.', array('@binary' => $this->executableName())),
+        '#title' => $this->t('Executable'),
+        '#markup' => $this->t('The @binary binary must be installed, please install or specify the path to the @binary executable directly.', array('@binary' => $this->executableName())),
       );
     }
     else {
       $form['executable'] = array(
         '#type' => 'item',
-        '#title' => t('Executable'),
-        '#markup' => t('The @binary executable has been automatically located: @path. To override, set a different executate path below.', array('@path' => $this->findExecutablePath(), '@binary' => $this->executableName())),
+        '#title' => $this->t('Executable'),
+        '#markup' => $this->t('The @binary executable has been automatically located: @path. To override, set a different executate path below.', array('@path' => $this->findExecutablePath(), '@binary' => $this->executableName())),
       );
     }
 
     $form['manual_executable_path'] = array(
       '#type' => 'textfield',
-      '#title' => t('Manually set path'),
-      '#description' => t('Specify the full path to the @binary executable.', array('@binary' => $this->executableName())),
+      '#title' => $this->t('Manually set path'),
+      '#description' => $this->t('Specify the full path to the @binary executable.', array('@binary' => $this->executableName())),
       '#default_value' => $this->configuration['manual_executable_path'],
     );
     return $form;
@@ -186,7 +186,7 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
     $description = '';
 
     if (!$this->getFullPathToBinary()) {
-      $description .= t('<strong>Command not found</strong>');
+      $description .= $this->t('<strong>Command not found</strong>');
     }
 
     $summary = array(

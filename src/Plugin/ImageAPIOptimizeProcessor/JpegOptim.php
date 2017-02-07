@@ -77,33 +77,33 @@ class JpegOptim extends ImageAPIOptimizeProcessorBinaryBase {
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $form['progressive'] = array(
-      '#title' => t('Progressive'),
+      '#title' => $this->t('Progressive'),
       '#type' => 'select',
       '#options' => array(
-        '' => t('No change'),
-        0 => t('Non-progressive'),
-        1 => t('Progressive'),
+        '' => $this->t('No change'),
+        0 => $this->t('Non-progressive'),
+        1 => $this->t('Progressive'),
       ),
       '#default_value' => $this->configuration['progressive'],
-      '#description' => t('If "No change" is selected, the output will have the same as the input.'),
+      '#description' => $this->t('If "No change" is selected, the output will have the same as the input.'),
     );
 
     $form['quality'] = array(
-      '#title' => t('Quality'),
+      '#title' => $this->t('Quality'),
       '#type' => 'number',
       '#min' => 0,
       '#max' => 100,
-      '#description' => t('Optionally enter a JPEG quality setting to use, 0 - 100. WARNING: LOSSY'),
+      '#description' => $this->t('Optionally enter a JPEG quality setting to use, 0 - 100. WARNING: LOSSY'),
       '#default_value' => $this->configuration['quality'],
     );
 
     $form['size'] = array(
-      '#title' => t('Target size'),
+      '#title' => $this->t('Target size'),
       '#type' => 'number',
       '#min' => 1,
       '#max' => 100,
       '#field_suffix' => '%',
-      '#description' => t('Optionally enter a target percentage of filesize for optimisation. WARNING: LOSSY'),
+      '#description' => $this->t('Optionally enter a target percentage of filesize for optimisation. WARNING: LOSSY'),
       '#default_value' => $this->configuration['size'],
     );
 

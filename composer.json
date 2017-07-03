@@ -3,5 +3,8 @@
     "description": "Define pipelines for image optimization and provide integration with core image styles.",
     "type": "drupal-module",
     "license": "GPL-2.0+",
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "require": {
+        "tinify/tinify": "~1.5"
+    }
 }

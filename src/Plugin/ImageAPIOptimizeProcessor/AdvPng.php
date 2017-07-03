@@ -62,7 +62,7 @@ class AdvPng extends ImageAPIOptimizeProcessorBinaryBase {
     $form['recompress'] = array(
       '#title' => $this->t('Recompress'),
       '#type' => 'checkbox',
-      '#default_value' => $this->configuration['recomporess'],
+      '#default_value' => $this->configuration['recompress'],
     );
 
     $form['mode'] = array(

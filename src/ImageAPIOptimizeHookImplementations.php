@@ -13,13 +13,6 @@ class ImageAPIOptimizeHookImplementations {
   use StringTranslationTrait;
 
   /**
-   * The stream wrapper manager service.
-   *
-   * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface
-   */
-  protected $stringTranslation;
-
-  /**
    * Constructs a new ImageAPIOptimizeHookImplementations object.
    *
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation

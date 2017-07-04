@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageFieldWidgetTest extends \Drupal\image\Tests\ImageFieldWidgetTest {
+class ImageFieldWidgetTest extends \Drupal\Tests\image\Functional\ImageFieldWidgetTest {
   public static $modules = array('imageapi_optimize',);
 }

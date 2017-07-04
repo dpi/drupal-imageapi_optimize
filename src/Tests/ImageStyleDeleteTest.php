@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageStyleDeleteTest extends \Drupal\image\Tests\ImageStyleDeleteTest {
+class ImageStyleDeleteTest extends \Drupal\Tests\image\Functional\ImageStyleDeleteTest {
   public static $modules = array('imageapi_optimize',);
 }

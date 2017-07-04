@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageEffectsTest extends \Drupal\image\Tests\ImageEffectsTest {
+class ImageEffectsTest extends \Drupal\Tests\image\Functional\ImageEffectsTest {
   public static $modules = array('imageapi_optimize',);
 }

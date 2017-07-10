@@ -6,6 +6,7 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Image\ImageInterface;
+use Drupal\iamgeapi_optimize\ImageAPIOptimizeShellOperationsInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -22,12 +23,20 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
   protected $fileSystem;
 
   /**
+   * The imageapi shell operation service.
+   *
+   * @var \Drupal\imageapi_optimize\ImageAPIOptimizeShellOperationsInterface
+   */
+  protected $shellOperations;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, ImageFactory $image_factory, FileSystemInterface $file_system) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, ImageFactory $image_factory, FileSystemInterface $file_system, ImageAPIOptimizeShellOperationsInterface $shell_operatons) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $logger, $image_factory);
 
     $this->fileSystem = $file_system;
+    $this->shellOperations = $shell_operatons;
   }
 
   /**
@@ -40,7 +49,8 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
       $plugin_definition,
       $container->get('logger.factory')->get('imageapi_optimize'),
       $container->get('image.factory'),
-      $container->get('file_system')
+      $container->get('file_system'),
+      $container->get('imageapi_optimize.shell_operations')
     );
   }
 
@@ -106,13 +116,7 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
     if (is_null($executable)) {
       $executable = $this->executableName();
     }
-    $output = array();
-    $return_var = 0;
-    $path = exec('which ' . escapeshellarg($executable), $output, $return_var);
-    if ($return_var == 0) {
-      return $path;
-    }
-    return FALSE;
+    return $this->shellOperations->findExecutablePath($executable);
   }
 
   /**
@@ -129,18 +133,7 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
    *   Returns TRUE if the command completed successfully, FALSE otherwise.
    */
   protected function execShellCommand($command, $options, $arguments) {
-    $output = array();
-    $return_val = 0;
-    $option_string = implode(' ', $options);
-    $argument_string = implode(' ', array_map('escapeshellarg', $arguments));
-    $last_line = exec(escapeshellcmd($command) . ' ' . $option_string . ' ' . $argument_string, $output, $return_val);
-
-    if ($return_val == 0) {
-      return TRUE;
-    }
-    else {
-      return FALSE;
-    }
+    return $this->shellOperations->execShellCommand($command, $options, $arguments);
   }
 
   /**
@@ -157,20 +150,7 @@ abstract class ImageAPIOptimizeProcessorBinaryBase extends ConfigurableImageAPIO
   }
 
   protected function saveCommandStdoutToFile($cmd, $dst) {
-    $return_val = 0;
-    ob_start();
-    passthru($cmd);
-    $output = ob_get_contents();
-    ob_end_clean();
-
-    file_unmanaged_save_data($output, $dst, FILE_EXISTS_REPLACE);
-
-    if ($return_val == 0) {
-      return TRUE;
-    }
-    else {
-      return FALSE;
-    }
+    return $this->shellOperations->saveCommandStdoutToFile($cmd, $dst);
   }
 
   public function getFullPathToBinary() {

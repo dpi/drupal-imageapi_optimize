@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\imageapi_optimize\Unit;
 
-use Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor\AdvDef;
 use Drupal\Tests\UnitTestCase;
+use Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor\AdvDef;
 
 /**
  * Tests AdvDef image optimize plugin.
@@ -14,26 +14,41 @@ class AdvDefTest extends UnitTestCase {
   function testCase() {
     $this->assertTrue(TRUE);
 
-    $advdefMock = $this->getMockBuilder('\Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor\AdvDef')
-      ->setMethods(['getFullPathToBinary', 'execShellCommand', 'getMimeType', 'sanitizeFilename'])
+
+
+    // Make some mocks.
+    $config = [];
+    $loggerMock = $this->getMock('\Psr\Log\LoggerInterface');
+    $imageFactoryMock = $this->getMockBuilder('\Drupal\Core\Image\ImageFactory')
       ->disableOriginalConstructor()
-      ->disableOriginalClone()
-      ->disableArgumentCloning()
+      ->getMock();
+    $fileSystemMock = $this->getMock('\Drupal\Core\File\FileSystemInterface');
+    $shellOperationsMock = $this->getMockBuilder('\Drupal\iamgeapi_optimize\ImageAPIOptimizeShellOperationsInterface')
+      ->setMethods(['findExecutablePath', 'execShellCommand'])
       ->getMock();
 
-    $advdefMock->method('getFullPathToBinary')
-      ->willReturn('/bin/advdef');
-    $advdefMock->method('sanitizeFilename')
-      ->will($this->returnArgument(0));
+    // Load up the plugin.
+    $advdef = new AdvDef($config, 'advdef', [], $loggerMock, $imageFactoryMock, $fileSystemMock, $shellOperationsMock);
 
-    $this->assertEquals('/bin/advdef', $advdefMock->getFullPathToBinary());
-    $this->assertEquals('some filename', $advdefMock->sanitizeFilename('some filename'));
+    $this->assertArrayHasKey('recompress', $advdef->defaultConfiguration());
+    $this->assertArrayHasKey('mode', $advdef->defaultConfiguration());
 
-    $advdefMock->expects($this->once())
+    $shellOperationsMock->method('findExecutablePath')->will($this->returnArgument(0));
+    $fileSystemMock->method('realpath')->will($this->returnArgument(0));
+
+    $imagePNGMock = $this->getMock('\Drupal\Core\Image\ImageInterface');
+    $imagePNGMock->method('getMimeType')->willReturn('image/png');
+    $imageFactoryMock->method('get')->willReturn($imagePNGMock);
+
+    $shellOperationsMock->expects($this->once())
       ->method('execShellCommand')
-      ->with($this->equalTo('something'));
+      ->with(
+        $this->equalTo('advdef'),
+        $this->identicalTo(['--quiet', '--recompress', '-3']),
+        $this->identicalTo(['public://test_image.png'])
+      );
 
-    $advdefMock->applyToImage('public://test_image.png');
+    $advdef->applyToImage('public://test_image.png');
 
   }
 }

@@ -5,5 +5,3 @@ services:
   imageapi_optimize.hooks:
     class: Drupal\imageapi_optimize\ImageAPIOptimizeHookImplementations
     arguments: ['@string_translation']
-  imageapi_optimize.shell_operations:
-    class: Drupal\imageapi_optimize\ShellOperations

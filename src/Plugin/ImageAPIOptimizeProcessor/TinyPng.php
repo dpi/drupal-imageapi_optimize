@@ -100,7 +100,7 @@ class TinyPng extends ConfigurableImageAPIOptimizeProcessorBase {
     $form['api_key'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('TinyPNG API key'),
-      '#description' => $this->t('Enter required TinyPNG API key. Get your API key from <a hre="http://tinypng.com" target="_blank">http://tinypng.com</a>'),
+      '#description' => $this->t('Enter required TinyPNG API key. Get your API key from <a href="https://tinypng.com" target="_blank">https://tinypng.com</a>'),
       '#default_value' => $this->configuration['api_key'],
       '#size' => 32,
       '#required' => TRUE

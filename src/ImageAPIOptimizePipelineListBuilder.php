@@ -3,6 +3,7 @@
 namespace Drupal\imageapi_optimize;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Core\Config\Entity\ConfigEntityStorageInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormBuilderInterface;
@@ -38,11 +39,10 @@ class ImageAPIOptimizePipelineListBuilder extends ConfigEntityListBuilder {
    * Constructs a new EntityListBuilder object.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
-   *   The entity type definition.
-   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
-   *   The entity storage class.
+   * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage
+   * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
    */
-  public function __construct(EntityTypeInterface $entity_type, ImageAPIOptimizePipelineStorageInterface $storage, FormBuilderInterface $form_builder) {
+  public function __construct(EntityTypeInterface $entity_type, ConfigEntityStorageInterface $storage, FormBuilderInterface $form_builder) {
     $this->entityTypeId = $entity_type->id();
     $this->storage = $storage;
     $this->entityType = $entity_type;

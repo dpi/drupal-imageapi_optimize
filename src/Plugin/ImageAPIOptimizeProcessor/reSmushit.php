@@ -7,6 +7,7 @@ use Drupal\Core\Image\ImageFactory;
 use Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorBase;
 use Drupal\imageapi_optimize\ImageAPIOptimizeProcessorBase;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

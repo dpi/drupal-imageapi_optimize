@@ -1,5 +1,6 @@
 name: Image Optimize (or ImageAPI Optimize)
 type: module
+package: Image Optimize
 description: 'Define pipelines for image optimization and provide integration with core image styles.'
 core: 8.x
 dependencies:

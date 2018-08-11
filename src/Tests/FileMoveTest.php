@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class FileMoveTest extends \Drupal\image\Tests\FileMoveTest {
+class FileMoveTest extends \Drupal\Tests\image\Functional\FileMoveTest {
   public static $modules = array('imageapi_optimize',);
 }

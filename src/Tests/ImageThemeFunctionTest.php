@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageThemeFunctionTest extends \Drupal\image\Tests\ImageThemeFunctionTest {
-  public static $modules = array('imageapi_optimize',);
+class ImageThemeFunctionTest extends \Drupal\Tests\image\Kernel\ImageThemeFunctionTest {
+  public static $modules = ['imageapi_optimize'];
 }

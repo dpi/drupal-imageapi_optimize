@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageDimensionsTest extends \Drupal\image\Tests\ImageDimensionsTest {
+class ImageDimensionsTest extends \Drupal\Tests\image\Functional\ImageDimensionsTest {
   public static $modules = array('imageapi_optimize',);
 }

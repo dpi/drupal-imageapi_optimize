@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageStyleFlushTest extends \Drupal\image\Tests\ImageStyleFlushTest {
+class ImageStyleFlushTest extends \Drupal\Tests\image\Functional\ImageStyleFlushTest {
   public static $modules = array('imageapi_optimize',);
 }

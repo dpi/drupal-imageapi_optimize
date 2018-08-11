@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageOnTranslatedEntityTest extends \Drupal\image\Tests\ImageOnTranslatedEntityTest {
+class ImageOnTranslatedEntityTest extends \Drupal\Tests\image\Functional\ImageOnTranslatedEntityTest {
   public static $modules = array('imageapi_optimize',);
 }

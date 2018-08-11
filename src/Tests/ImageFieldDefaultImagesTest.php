@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageFieldDefaultImagesTest extends \Drupal\image\Tests\ImageFieldDefaultImagesTest {
+class ImageFieldDefaultImagesTest extends \Drupal\Tests\image\Functional\ImageFieldDefaultImagesTest {
   public static $modules = array('imageapi_optimize',);
 }

@@ -7,6 +7,6 @@ namespace Drupal\imageapi_optimize\Tests;
  *
  * @group image
  */
-class ImageAdminStylesTest extends \Drupal\image\Tests\ImageAdminStylesTest {
+class ImageAdminStylesTest extends \Drupal\Tests\image\Functional\ImageAdminStylesTest {
   public static $modules = array('imageapi_optimize',);
 }

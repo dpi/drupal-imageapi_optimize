@@ -34,7 +34,7 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay;
  *     "storage" = "Drupal\imageapi_optimize\ImageAPIOptimizePipelineStorage",
  *   },
  *   admin_permission = "administer imageapi optimize pipelines",
- *   config_prefix = "processor",
+ *   config_prefix = "pipeline",
  *   entity_keys = {
  *     "id" = "name",
  *     "label" = "label"

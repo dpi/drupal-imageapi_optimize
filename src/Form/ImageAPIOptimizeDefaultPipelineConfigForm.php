@@ -5,6 +5,9 @@ namespace Drupal\imageapi_optimize\Form;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ *
+ */
 class ImageAPIOptimizeDefaultPipelineConfigForm extends ConfigFormBase {
 
   /**
@@ -20,7 +23,6 @@ class ImageAPIOptimizeDefaultPipelineConfigForm extends ConfigFormBase {
   protected function getEditableConfigNames() {
     return ['imageapi_optimize.settings'];
 
-
   }
 
   /**
@@ -28,13 +30,13 @@ class ImageAPIOptimizeDefaultPipelineConfigForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, Request $request = NULL) {
     $config = $this->config('imageapi_optimize.settings');
-    $form['default_pipeline'] = array(
+    $form['default_pipeline'] = [
       '#type' => 'select',
       '#title' => $this->t('Sitewide default pipeline'),
       '#description' => $this->t("When selecting a pipeline to use elsewhere you may simply select 'default' to use whatever pipeline you have set here."),
       '#options' => imageapi_optimize_pipeline_options(TRUE, FALSE),
       '#default_value' => $config->get('default_pipeline'),
-    );
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -47,4 +49,5 @@ class ImageAPIOptimizeDefaultPipelineConfigForm extends ConfigFormBase {
       ->set('default_pipeline', $values['default_pipeline'])
       ->save();
   }
+
 }

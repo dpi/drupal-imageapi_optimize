@@ -2,6 +2,7 @@
 
 namespace Drupal\imageapi_optimize;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 
@@ -40,7 +41,7 @@ class ImageAPIOptimizeHookImplementations {
   /**
    * Implements hook_form_image_style_edit_form_alter().
    */
-  public function form_image_style_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  public function form_image_style_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
     $entity = $form_state->getFormObject()->getEntity();
     $form['pipeline'] = [
       '#type' => 'select',
@@ -60,4 +61,5 @@ class ImageAPIOptimizeHookImplementations {
       $definitions['image.style.*']['mapping']['pipeline']['type'] = 'string';
     }
   }
+
 }

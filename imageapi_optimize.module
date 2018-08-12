@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ */
+
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline;
 
 /**
@@ -7,19 +12,20 @@ use Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline;
  *
  * @param $include_empty
  *   If TRUE a '- None -' option will be inserted in the options array.
+ *
  * @return
  *   Array of image pipelines both key and value are set to pipeline name.
  */
 function imageapi_optimize_pipeline_options($include_empty = TRUE, $include_site_default = TRUE) {
   $pipelines = ImageAPIOptimizePipeline::loadMultiple();
-  $options = array();
+  $options = [];
   if ($include_empty && !empty($pipelines)) {
     $options[''] = t('- None -');
   }
   if ($include_site_default && !empty($pipelines)) {
     if ($default_pipeline_name = \Drupal::config('imageapi_optimize.settings')->get('default_pipeline')) {
       if ($default_pipeline = ImageAPIOptimizePipeline::load($default_pipeline_name)) {
-        $options['__default__'] = t('Sitewide default pipeline: @name', array('@name' => $default_pipeline->label()));
+        $options['__default__'] = t('Sitewide default pipeline: @name', ['@name' => $default_pipeline->label()]);
       }
     }
   }
@@ -50,6 +56,6 @@ function imageapi_optimize_config_schema_info_alter(&$definitions) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function imageapi_optimize_form_image_style_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+function imageapi_optimize_form_image_style_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   return \Drupal::service('imageapi_optimize.hooks')->form_image_style_edit_form_alter($form, $form_state, $form_id);
 }

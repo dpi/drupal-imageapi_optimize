@@ -4,7 +4,6 @@ namespace Drupal\imageapi_optimize;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\imageapi_optimize\ImageInterface;
 
 /**
  * Defines the interface for image optimize processors.

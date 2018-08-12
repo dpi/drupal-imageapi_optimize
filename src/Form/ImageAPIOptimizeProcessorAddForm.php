@@ -44,7 +44,7 @@ class ImageAPIOptimizeProcessorAddForm extends ImageAPIOptimizeProcessorFormBase
   public function buildForm(array $form, FormStateInterface $form_state, ImageAPIOptimizePipelineInterface $imageapi_optimize_pipeline = NULL, $imageapi_optimize_processor = NULL) {
     $form = parent::buildForm($form, $form_state, $imageapi_optimize_pipeline, $imageapi_optimize_processor);
 
-    $form['#title'] = $this->t('Add %label processor', array('%label' => $this->imageAPIOptimizeProcessor->label()));
+    $form['#title'] = $this->t('Add %label processor', ['%label' => $this->imageAPIOptimizeProcessor->label()]);
     $form['actions']['submit']['#value'] = $this->t('Add processor');
 
     return $form;

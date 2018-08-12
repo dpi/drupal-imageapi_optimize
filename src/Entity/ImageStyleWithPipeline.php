@@ -4,9 +4,14 @@ namespace Drupal\imageapi_optimize\Entity;
 
 use Drupal\image\Entity\ImageStyle;
 
+/**
+ *
+ */
 class ImageStyleWithPipeline extends ImageStyle {
 
-  //@TODO: maybe this should be something other than a 'random' string.
+  /**
+   * @TODO: maybe this should be something other than a 'random' string.
+   */
   protected $pipeline = '__default__';
 
   /**
@@ -26,6 +31,9 @@ class ImageStyleWithPipeline extends ImageStyle {
     return $result;
   }
 
+  /**
+   *
+   */
   public function getPipeline() {
     return $this->pipeline;
   }
@@ -50,9 +58,11 @@ class ImageStyleWithPipeline extends ImageStyle {
     }
   }
 
+  /**
+   *
+   */
   public function hasPipeline() {
     return (bool) $this->getPipelineEntity();
   }
-
 
 }

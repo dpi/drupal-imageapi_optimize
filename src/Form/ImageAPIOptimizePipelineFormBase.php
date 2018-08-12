@@ -50,20 +50,20 @@ abstract class ImageAPIOptimizePipelineFormBase extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
 
-    $form['label'] = array(
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Image optimize pipeline name'),
       '#default_value' => $this->entity->label(),
       '#required' => TRUE,
-    );
-    $form['name'] = array(
+    ];
+    $form['name'] = [
       '#type' => 'machine_name',
-      '#machine_name' => array(
-        'exists' => array($this->imageapiOptimizePipelineStorage, 'load'),
-      ),
+      '#machine_name' => [
+        'exists' => [$this->imageapiOptimizePipelineStorage, 'load'],
+      ],
       '#default_value' => $this->entity->id(),
       '#required' => TRUE,
-    );
+    ];
 
     return parent::form($form, $form_state);
   }

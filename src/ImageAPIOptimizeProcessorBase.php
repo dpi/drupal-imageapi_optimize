@@ -76,14 +76,14 @@ abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements Image
    * {@inheritdoc}
    */
   public function getSummary() {
-    return array(
+    return [
       '#markup' => '',
-      '#processor' => array(
+      '#processor' => [
         'id' => $this->pluginDefinition['id'],
         'label' => $this->label(),
         'description' => $this->pluginDefinition['description'],
-      ),
-    );
+      ],
+    ];
   }
 
   /**
@@ -119,23 +119,23 @@ abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements Image
    * {@inheritdoc}
    */
   public function getConfiguration() {
-    return array(
+    return [
       'uuid' => $this->getUuid(),
       'id' => $this->getPluginId(),
       'weight' => $this->getWeight(),
       'data' => $this->configuration,
-    );
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
   public function setConfiguration(array $configuration) {
-    $configuration += array(
-      'data' => array(),
+    $configuration += [
+      'data' => [],
       'uuid' => '',
       'weight' => '',
-    );
+    ];
     $this->configuration = $configuration['data'] + $this->defaultConfiguration();
     $this->uuid = $configuration['uuid'];
     $this->weight = $configuration['weight'];
@@ -146,17 +146,21 @@ abstract class ImageAPIOptimizeProcessorBase extends PluginBase implements Image
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array();
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function calculateDependencies() {
-    return array();
+    return [];
   }
 
+  /**
+   *
+   */
   protected function getMimeType($uri) {
     return $this->imageFactory->get($uri)->getMimeType();
   }
+
 }

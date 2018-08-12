@@ -21,8 +21,9 @@ class ImageAPIOptimizePipelineDeleteForm extends EntityDeleteForm {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Optionally select a pipeline before deleting %pipeline', array('%pipeline' => $this->entity->label()));
+    return $this->t('Optionally select a pipeline before deleting %pipeline', ['%pipeline' => $this->entity->label()]);
   }
+
   /**
    * {@inheritdoc}
    */

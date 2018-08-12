@@ -43,4 +43,5 @@ class ImageStyleWithPipelineListBuilder extends ImageStyleListBuilder {
     $row['operations'] = $operations;
     return $row;
   }
+
 }

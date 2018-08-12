@@ -49,44 +49,44 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
    */
   public function form(array $form, FormStateInterface $form_state) {
     $user_input = $form_state->getUserInput();
-    $form['#title'] = $this->t('Edit pipeline %name', array('%name' => $this->entity->label()));
+    $form['#title'] = $this->t('Edit pipeline %name', ['%name' => $this->entity->label()]);
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'imageapi_optimize/admin';
 
     // Build the list of existing image processors for this image optimize pipeline.
-    $form['processors'] = array(
+    $form['processors'] = [
       '#type' => 'table',
-      '#header' => array(
+      '#header' => [
         $this->t('Processor'),
         $this->t('Weight'),
         $this->t('Operations'),
-      ),
-      '#tabledrag' => array(
-        array(
+      ],
+      '#tabledrag' => [
+        [
           'action' => 'order',
           'relationship' => 'sibling',
           'group' => 'image-processor-order-weight',
-        ),
-      ),
-      '#attributes' => array(
+        ],
+      ],
+      '#attributes' => [
         'id' => 'image-pipeline-processors',
-      ),
+      ],
       '#empty' => t('There are currently no processors in this pipeline. Add one by selecting an option below.'),
       // Render processors below parent elements.
       '#weight' => 5,
-    );
+    ];
     foreach ($this->entity->getProcessors() as $processor) {
       $key = $processor->getUuid();
       $form['processors'][$key]['#attributes']['class'][] = 'draggable';
       $form['processors'][$key]['#weight'] = isset($user_input['processors']) ? $user_input['processors'][$key]['weight'] : NULL;
-      $form['processors'][$key]['processor'] = array(
+      $form['processors'][$key]['processor'] = [
         '#tree' => FALSE,
-        'data' => array(
-          'label' => array(
+        'data' => [
+          'label' => [
             '#plain_text' => $processor->label(),
-          ),
-        ),
-      );
+          ],
+        ],
+      ];
 
       $summary = $processor->getSummary();
 
@@ -95,42 +95,42 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
         $form['processors'][$key]['processor']['data']['summary'] = $summary;
       }
 
-      $form['processors'][$key]['weight'] = array(
+      $form['processors'][$key]['weight'] = [
         '#type' => 'weight',
-        '#title' => $this->t('Weight for @title', array('@title' => $processor->label())),
+        '#title' => $this->t('Weight for @title', ['@title' => $processor->label()]),
         '#title_display' => 'invisible',
         '#default_value' => $processor->getWeight(),
-        '#attributes' => array(
-          'class' => array('image-processor-order-weight'),
-        ),
-      );
+        '#attributes' => [
+          'class' => ['image-processor-order-weight'],
+        ],
+      ];
 
-      $links = array();
+      $links = [];
       $is_configurable = $processor instanceof ConfigurableImageAPIOptimizeProcessorInterface;
       if ($is_configurable) {
-        $links['edit'] = array(
+        $links['edit'] = [
           'title' => $this->t('Edit'),
           'url' => Url::fromRoute('imageapi_optimize.processor_edit_form', [
             'imageapi_optimize_pipeline' => $this->entity->id(),
             'imageapi_optimize_processor' => $key,
           ]),
-        );
+        ];
       }
-      $links['delete'] = array(
+      $links['delete'] = [
         'title' => $this->t('Delete'),
         'url' => Url::fromRoute('imageapi_optimize.processor_delete', [
           'imageapi_optimize_pipeline' => $this->entity->id(),
           'imageapi_optimize_processor' => $key,
         ]),
-      );
-      $form['processors'][$key]['operations'] = array(
+      ];
+      $form['processors'][$key]['operations'] = [
         '#type' => 'operations',
         '#links' => $links,
-      );
+      ];
     }
 
     // Build the new image processor addition form and add it to the processor list.
-    $new_processor_options = array();
+    $new_processor_options = [];
     $processors = $this->imageAPIOptimizeProcessorManager->getDefinitions();
     uasort($processors, function ($a, $b) {
       return strcasecmp($a['id'], $b['id']);
@@ -138,43 +138,43 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
     foreach ($processors as $processor => $definition) {
       $new_processor_options[$processor] = $definition['label'];
     }
-    $form['processors']['new'] = array(
+    $form['processors']['new'] = [
       '#tree' => FALSE,
       '#weight' => isset($user_input['weight']) ? $user_input['weight'] : NULL,
-      '#attributes' => array('class' => array('draggable')),
-    );
-    $form['processors']['new']['processor'] = array(
-      'data' => array(
-        'new' => array(
+      '#attributes' => ['class' => ['draggable']],
+    ];
+    $form['processors']['new']['processor'] = [
+      'data' => [
+        'new' => [
           '#type' => 'select',
           '#title' => $this->t('Processor'),
           '#title_display' => 'invisible',
           '#options' => $new_processor_options,
           '#empty_option' => $this->t('Select a new processor'),
-        ),
-        array(
-          'add' => array(
+        ],
+        [
+          'add' => [
             '#type' => 'submit',
             '#value' => $this->t('Add'),
-            '#validate' => array('::processorValidate'),
-            '#submit' => array('::submitForm', '::processorSave'),
-          ),
-        ),
-      ),
+            '#validate' => ['::processorValidate'],
+            '#submit' => ['::submitForm', '::processorSave'],
+          ],
+        ],
+      ],
       '#prefix' => '<div class="image-pipeline-new">',
       '#suffix' => '</div>',
-    );
+    ];
 
-    $form['processors']['new']['weight'] = array(
+    $form['processors']['new']['weight'] = [
       '#type' => 'weight',
       '#title' => $this->t('Weight for new processor'),
       '#title_display' => 'invisible',
       '#default_value' => count($this->entity->getProcessors()) + 1,
-      '#attributes' => array('class' => array('image-processor-order-weight')),
-    );
-    $form['processors']['new']['operations'] = array(
-      'data' => array(),
-    );
+      '#attributes' => ['class' => ['image-processor-order-weight']],
+    ];
+    $form['processors']['new']['operations'] = [
+      'data' => [],
+    ];
 
     return parent::form($form, $form_state);
   }
@@ -201,20 +201,20 @@ class ImageAPIOptimizePipelineEditForm extends ImageAPIOptimizePipelineFormBase 
     if (is_subclass_of($processor['class'], '\Drupal\imageapi_optimize\ConfigurableImageAPIOptimizeProcessorInterface')) {
       $form_state->setRedirect(
         'imageapi_optimize.processor_add_form',
-        array(
+        [
           'imageapi_optimize_pipeline' => $this->entity->id(),
           'imageapi_optimize_processor' => $form_state->getValue('new'),
-        ),
-        array('query' => array('weight' => $form_state->getValue('weight')))
+        ],
+        ['query' => ['weight' => $form_state->getValue('weight')]]
       );
     }
     // If there's no form, immediately add the image processor.
     else {
-      $processor = array(
+      $processor = [
         'id' => $processor['id'],
-        'data' => array(),
+        'data' => [],
         'weight' => $form_state->getValue('weight'),
-      );
+      ];
       $processor_id = $this->entity->addProcessor($processor);
       $this->entity->save();
       if (!empty($processor_id)) {

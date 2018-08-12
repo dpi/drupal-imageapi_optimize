@@ -7,7 +7,7 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines an image optimize processor annotation object.
  *
- * Plugin Namespace: Plugin\ImageAPIOptimizeProcessor
+ * Plugin Namespace: Plugin\ImageAPIOptimizeProcessor.
  *
  * For a working example, see
  * \Drupal\imageapi_optimize\Plugin\ImageAPIOptimizeProcessor\reSmushit
@@ -47,7 +47,7 @@ class ImageAPIOptimizeProcessor extends Plugin {
    *
    * @ingroup plugin_translatable
    *
-   * @var \Drupal\Core\Annotation\Translation (optional)
+   * @var \Drupal\Core\Annotation\Translation
    */
   public $description = '';
 

@@ -29,7 +29,7 @@ class ImageAPIOptimizeProcessorDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to delete the @processor processor from the %pipeline pipeline?', array('%pipeline' => $this->imageAPIOptimizePipeline->label(), '@processor' => $this->imageAPIOptimizeProcessor->label()));
+    return $this->t('Are you sure you want to delete the @processor processor from the %pipeline pipeline?', ['%pipeline' => $this->imageAPIOptimizePipeline->label(), '@processor' => $this->imageAPIOptimizeProcessor->label()]);
   }
 
   /**
@@ -68,7 +68,7 @@ class ImageAPIOptimizeProcessorDeleteForm extends ConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->imageAPIOptimizePipeline->deleteProcessor($this->imageAPIOptimizeProcessor);
-    drupal_set_message($this->t('The Image Optimize processor %name has been deleted.', array('%name' => $this->imageAPIOptimizeProcessor->label())));
+    drupal_set_message($this->t('The Image Optimize processor %name has been deleted.', ['%name' => $this->imageAPIOptimizeProcessor->label()]));
     $form_state->setRedirectUrl($this->imageAPIOptimizePipeline->urlInfo('edit-form'));
   }
 

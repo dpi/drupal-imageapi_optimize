@@ -5,6 +5,7 @@ namespace Drupal\imageapi_optimize;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\imageapi_optimize\Exception\PluginNotFoundException;
 
 /**
  * Manages image optimize processor plugins.
@@ -35,6 +36,36 @@ class ImageAPIOptimizeProcessorManager extends DefaultPluginManager {
 
     $this->alterInfo('imageapi_optimize_processor_info');
     $this->setCacheBackend($cache_backend, 'imageapi_optimize_processor_plugins');
+  }
+
+  /**
+   * Gets a specific plugin definition.
+   *
+   * @param array $definitions
+   *   An array of the available plugin definitions.
+   * @param string $plugin_id
+   *   A plugin id.
+   * @param bool $exception_on_invalid
+   *   If TRUE, an invalid plugin ID will cause an exception to be thrown; if
+   *   FALSE, NULL will be returned.
+   *
+   * @return array|null
+   *   A plugin definition, or NULL if the plugin ID is invalid and
+   *   $exception_on_invalid is TRUE.
+   *
+   * @throws \Drupal\imageapi_optimize\Exception\PluginNotFoundException
+   *   Thrown if $plugin_id is invalid and $exception_on_invalid is TRUE.
+   */
+  protected function doGetDefinition(array $definitions, $plugin_id, $exception_on_invalid) {
+    // Avoid using a ternary that would create a copy of the array.
+    if (isset($definitions[$plugin_id])) {
+      return $definitions[$plugin_id];
+    }
+    elseif (!$exception_on_invalid) {
+      return NULL;
+    }
+
+    throw new PluginNotFoundException($plugin_id, sprintf('The "%s" plugin does not exist.', $plugin_id));
   }
 
 }

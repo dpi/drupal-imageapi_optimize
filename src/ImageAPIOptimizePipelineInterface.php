@@ -56,10 +56,20 @@ interface ImageAPIOptimizePipelineInterface extends ConfigEntityInterface {
   /**
    * Returns the image optimize processors for this pipeline.
    *
+   * The processors should be sorted, and will have been instantiated.
+   *
    * @return \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorPluginCollection|\Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface[]
    *   The image optimize processor plugin collection.
    */
   public function getProcessors();
+
+  /**
+   * Returns an image optimize processors collection.
+   *
+   * @return \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorPluginCollection|\Drupal\imageapi_optimize\ImageAPIOptimizeProcessorInterface[]
+   *   The image optimize processor plugin collection.
+   */
+  public function getProcessorsCollection();
 
   /**
    * Saves an image optimize processor for this pipeline.

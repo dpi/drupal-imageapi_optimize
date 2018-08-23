@@ -229,10 +229,17 @@ class ImageAPIOptimizePipeline extends ConfigEntityBase implements ImageAPIOptim
    */
   public function getProcessors() {
     if (!$this->processorsCollection) {
-      $this->processorsCollection = new ImageAPIOptimizeProcessorPluginCollection($this->getImageAPIOptimizeProcessorPluginManager(), $this->processors);
+      $this->processorsCollection = $this->getProcessorsCollection();
       $this->processorsCollection->sort();
     }
     return $this->processorsCollection;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProcessorsCollection() {
+    return new ImageAPIOptimizeProcessorPluginCollection($this->getImageAPIOptimizeProcessorPluginManager(), $this->processors);
   }
 
   /**

@@ -30,3 +30,48 @@ function imageapi_optimize_update_8001() {
       ->save(TRUE);
   }
 }
+
+/**
+ * Re-enable sub modules.
+ */
+function imageapi_optimize_update_8002() {
+  $modules = [];
+
+  $pipelines = \Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline::loadMultiple();
+  /* @var \Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline $pipeline */
+  foreach ($pipelines as $pipeline) {
+    $processors = $pipeline->getProcessorsCollection();
+    foreach ($processors->getInstanceIds() as $id) {
+      try {
+        $processors->get($id);
+      } catch (\Drupal\imageapi_optimize\Exception\PluginNotFoundException $e) {
+        switch ($e->getPluginId()) {
+          case 'advdef':
+          case 'advpng':
+          case 'jfifremove':
+          case 'jpegoptim':
+          case 'jpegtran':
+          case 'optipng':
+          case 'pngcrush':
+          case 'pngout':
+          case 'pngquant':
+            $modules[] = 'imageapi_optimize_binaries';
+            break;
+
+          case 'resmushit':
+            $modules[] = 'imageapi_optimize_resmushit';
+            break;
+
+          case 'tinypng':
+            $modules[] = 'imageapi_optimize_tinypng';
+            break;
+        }
+      }
+    }
+  }
+
+  // Now we might have a list of modules to enable.
+  if (!empty($modules)) {
+    \Drupal::service('module_installer')->install(array_unique($modules));
+  }
+}

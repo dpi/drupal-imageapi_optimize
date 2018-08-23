@@ -6,9 +6,29 @@
  */
 
 /**
- * Update misnamed config entites.
+ * Remove previously invalid config entities.
  */
 function imageapi_optimize_update_8001() {
+  $config_factory = \Drupal::configFactory();
+  // These were mis-named, so can never have been in-use by anyone.
+  $legacy_pipelines = [
+    'imageapi_optimize.pipeline.resmushit',
+    'imageapi_optimize.pipeline.local_binaries',
+  ];
+  foreach ($legacy_pipelines as $legacy_pipeline) {
+    $config_list = $config_factory->listAll($legacy_pipeline);
+    foreach ($config_list as $config_key) {
+      $config = $config_factory->getEditable($config_key);
+      // Remove the old config entity.
+      $config->delete();
+    }
+  }
+}
+
+/**
+ * Update misnamed config entites.
+ */
+function imageapi_optimize_update_8002() {
   $config_factory = \Drupal::configFactory();
   $config_list = $config_factory->listAll('imageapi_optimize.processor.');
 
@@ -34,7 +54,7 @@ function imageapi_optimize_update_8001() {
 /**
  * Re-enable sub modules.
  */
-function imageapi_optimize_update_8002() {
+function imageapi_optimize_update_8003() {
   $modules = [];
 
   $pipelines = \Drupal\imageapi_optimize\Entity\ImageAPIOptimizePipeline::loadMultiple();

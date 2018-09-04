@@ -99,9 +99,8 @@ class ImageOptimizePipelineTest extends KernelTestBase {
     // Apply the pipeline.
     $pipeline->applyToImage($image_uri);
 
-    $this->markTestIncomplete('Marking as incomplete to get the tests committed.');
     // Check that the file was correctly 'optimized': adding 20 '1' characters.
-    //$this->assertFileEqualsString($original_image_data . str_repeat('1', 20), $image_uri);
+    $this->assertFileEqualsString($original_image_data . str_repeat('1', 20), $image_uri);
 
   }
 

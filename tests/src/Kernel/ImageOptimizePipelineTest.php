@@ -195,4 +195,26 @@ class ImageOptimizePipelineTest extends KernelTestBase {
     return $filepath;
   }
 
+  /**
+   * Test the pipeline does not fail badly when image does not exist.
+   */
+  public function testNonExistentImagePipeline() {
+
+    // Include special characters in the filename.
+    $image_uri = file_default_scheme() . '://Файл для тестирования ' . $this->randomMachineName() . '.png';
+    $this->assertFalse(is_file($image_uri), t('The test file does not exist on the disk.'));
+
+    // Setup our pipeline.
+    $pipeline = ImageAPIOptimizePipeline::create([
+      'name' => 'test',
+    ]);
+    $pipeline->addProcessor(['id' => 'imageapi_optimize_module_test_appendcharacters']);
+
+    // Apply the pipeline.
+    $result = $pipeline->applyToImage($image_uri);
+
+    // Check that the file was correctly 'optimized' to a black 1x1 PNG.
+    $this->assertFalse($result, 'Image pipeline failed to apply gracefully.');
+  }
+
 }

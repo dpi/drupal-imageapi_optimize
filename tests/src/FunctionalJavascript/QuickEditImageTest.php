@@ -7,6 +7,7 @@ use Drupal\Tests\image\FunctionalJavascript\QuickEditImageTest as OriginalQuickE
 /**
  * Tests the JavaScript functionality of the "image" in-place editor.
  *
+ * @coversDefaultClass \Drupal\image\Plugin\InPlaceEditor\Image
  * @group imageapi_optimize
  */
 class QuickEditImageTest extends OriginalQuickEditImageTest {

@@ -72,7 +72,7 @@ class ImageAPIOptimizePipelineListBuilder extends ConfigEntityListBuilder {
     $flush = [
       'title' => $this->t('Flush'),
       'weight' => 200,
-      'url' => $entity->urlInfo('flush-form'),
+      'url' => $entity->toUrl('flush-form'),
     ];
 
     return parent::getDefaultOperations($entity) + [

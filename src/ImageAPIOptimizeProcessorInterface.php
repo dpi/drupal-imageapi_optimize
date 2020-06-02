@@ -3,7 +3,6 @@
 namespace Drupal\imageapi_optimize;
 
 use Drupal\Component\Plugin\ConfigurableInterface;
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
@@ -17,7 +16,7 @@ use Drupal\Component\Plugin\PluginInspectionInterface;
  * @see \Drupal\imageapi_optimize\ImageAPIOptimizeProcessorManager
  * @see plugin_api
  */
-interface ImageAPIOptimizeProcessorInterface extends PluginInspectionInterface, ConfigurableInterface, DependentPluginInterface, ConfigurablePluginInterface {
+interface ImageAPIOptimizeProcessorInterface extends PluginInspectionInterface, ConfigurableInterface, DependentPluginInterface {
 
   /**
    * Returns a render array summarizing the configuration of the image optimize processor.
